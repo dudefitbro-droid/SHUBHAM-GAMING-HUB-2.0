@@ -29,68 +29,230 @@ nav a{color:white;text-decoration:none;margin-left:20px}
 .play{display:block;text-align:center;padding:11px;background:#672cff;color:white;text-decoration:none;border-radius:6px}
 .admin{background:#111426;padding:25px;border-radius:12px;border:1px solid #30304f}
 .admin input{display:block;width:100%;padding:13px;margin:10px 0;background:#080b18;color:white;border:1px solid #444;border-radius:6px}
+.admin-panel{display:none}
+.status{color:#00eaff;margin:15px 0}
 footer{text-align:center;padding:30px;color:#888}
 @media(max-width:600px){header{flex-direction:column;gap:15px}nav a{margin:0 8px}}
 </style>
 </head>
 <body>
+
 <header>
  <div class="logo">SHUBHAM <span>GAMING HUB</span></div>
- <nav><a href="#home">Home</a><a href="#games">Games</a><a href="#admin">Add Game</a></nav>
+ <nav>
+  <a href="#home">Home</a>
+  <a href="#games">Games</a>
+  <a href="#admin">Admin</a>
+ </nav>
 </header>
+
 <section class="hero" id="home">
  <h1>ENTER THE <span>GAMEVERSE</span></h1>
  <p>One Hub. Unlimited Games. Endless Fun.</p>
  <button class="btn" onclick="document.getElementById('games').scrollIntoView({behavior:'smooth'})">EXPLORE GAMES</button>
 </section>
+
 <section class="section" id="games">
  <h2>🎮 EXPLORE GAMES</h2>
  <input class="search" id="search" placeholder="Search your favourite game..." oninput="renderGames()">
+ <p id="loading" class="status">Loading games...</p>
  <div class="games" id="gameList"></div>
 </section>
+
 <section class="section" id="admin">
- <h2>➕ ADD YOUR GAME</h2>
+ <h2>🔐 ADMIN PANEL</h2>
  <div class="admin">
-  <input id="name" placeholder="Game Name">
-  <input id="category" placeholder="Game Category">
-  <input id="image" placeholder="Thumbnail Image URL">
-  <input id="url" placeholder="Playable Game URL">
-  <button class="btn" onclick="addGame()">ADD GAME</button>
+  <div id="loginPanel">
+   <p>Admin access only.</p>
+   <button class="btn" onclick="adminLogin()">ADMIN LOGIN</button>
+  </div>
+
+  <div id="adminPanel" class="admin-panel">
+   <h3>➕ ADD NEW GAME</h3>
+   <input id="name" placeholder="Game Name">
+   <input id="category" placeholder="Game Category">
+   <input id="image" placeholder="Thumbnail Image URL">
+   <input id="url" placeholder="Playable Game URL">
+   <button class="btn" id="addButton" onclick="addGame()">SAVE GAME</button>
+   <p id="message" class="status"></p>
+   <button class="btn" onclick="logout()" style="margin-top:12px">LOGOUT</button>
+  </div>
  </div>
 </section>
+
 <footer>© 2026 SHUBHAM GAMING HUB 2.0 | ALL RIGHTS RESERVED</footer>
+
 <script>
 const defaultGames = [
- {name:"Nitro Rush",category:"Racing",image:"https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=600",url:"https://nitrogam-shubham.vercel.app"},
- {name:"Super Runner",category:"Adventure",image:"https://images.unsplash.com/photo-1511512578047-dfb367046420?w=600",url:"#"}
+ {
+  name:"Nitro Rush",
+  category:"Racing",
+  image:"https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=600",
+  url:"https://nitrogam-shubham.vercel.app"
+ },
+ {
+  name:"Super Runner",
+  category:"Adventure",
+  image:"https://images.unsplash.com/photo-1511512578047-dfb367046420?w=600",
+  url:"#"
+ }
 ];
-let games = JSON.parse(localStorage.getItem("shubhamGames")) || defaultGames;
+
+let games = [...defaultGames];
+let adminPassword = "";
+
+async function loadGames(){
+ const loading = document.getElementById("loading");
+
+ try {
+  const response = await fetch("/api/games", {cache:"no-store"});
+
+  if(!response.ok) throw new Error("API unavailable");
+
+  const savedGames = await response.json();
+
+  if(!Array.isArray(savedGames)) throw new Error("Invalid data");
+
+  const converted = savedGames.map(g => ({
+   name:g.title,
+   category:g.category,
+   image:g.image,
+   url:g.url
+  }));
+
+  const urls = new Set(converted.map(g => g.url));
+
+  games = [
+   ...defaultGames.filter(g => !urls.has(g.url)),
+   ...converted
+  ];
+
+  loading.textContent = "Games loaded successfully!";
+ } catch(error) {
+  loading.textContent = "Showing default games. Saved games could not be loaded.";
+ }
+
+ renderGames();
+}
+
 function renderGames(){
- const list=document.getElementById("gameList");
- const query=document.getElementById("search").value.toLowerCase();
- list.innerHTML="";
- games.filter(g=>(g.name+" "+g.category).toLowerCase().includes(query)).forEach(g=>{
-  const card=document.createElement("div"); card.className="card";
-  const img=document.createElement("img"); img.src=g.image; img.alt=g.name;
-  const info=document.createElement("div"); info.className="info";
-  const title=document.createElement("h3"); title.textContent=g.name;
-  const category=document.createElement("p"); category.textContent=g.category;
-  const link=document.createElement("a"); link.className="play"; link.href=g.url; link.target="_blank"; link.rel="noopener"; link.textContent="PLAY NOW ▶";
-  info.append(title,category,link); card.append(img,info); list.append(card);
+ const list = document.getElementById("gameList");
+ const query = document.getElementById("search").value.toLowerCase();
+
+ list.innerHTML = "";
+
+ games.filter(g =>
+  (g.name+" "+g.category).toLowerCase().includes(query)
+ ).forEach(g => {
+  const card = document.createElement("div");
+  card.className = "card";
+
+  const img = document.createElement("img");
+  img.src = g.image;
+  img.alt = g.name;
+  img.loading = "lazy";
+
+  const info = document.createElement("div");
+  info.className = "info";
+
+  const title = document.createElement("h3");
+  title.textContent = g.name;
+
+  const category = document.createElement("p");
+  category.textContent = g.category;
+
+  const link = document.createElement("a");
+  link.className = "play";
+  link.href = g.url;
+  link.target = "_blank";
+  link.rel = "noopener";
+  link.textContent = "PLAY NOW ▶️";
+
+  info.append(title,category,link);
+  card.append(img,info);
+  list.append(card);
  });
 }
-function addGame(){
- const name=document.getElementById("name").value.trim();
- const category=document.getElementById("category").value.trim();
- const image=document.getElementById("image").value.trim();
- const url=document.getElementById("url").value.trim();
- if(!name||!category||!image||!url){alert("Please fill all fields!");return;}
- games.push({name,category,image,url});
- localStorage.setItem("shubhamGames",JSON.stringify(games));
- document.querySelectorAll(".admin input").forEach(i=>i.value="");
- renderGames(); alert("Game Added Successfully!");
+
+function adminLogin(){
+ const password = prompt("Enter your Admin Password:");
+
+ if(password === null || !password) return;
+
+ adminPassword = password;
+
+ document.getElementById("loginPanel").style.display = "none";
+ document.getElementById("adminPanel").style.display = "block";
+
+ document.getElementById("message").textContent =
+ "Enter game details and save. Password will be verified by server.";
 }
-renderGames();
+
+function logout(){
+ adminPassword = "";
+ document.getElementById("adminPanel").style.display = "none";
+ document.getElementById("loginPanel").style.display = "block";
+}
+
+async function addGame(){
+ const name = document.getElementById("name").value.trim();
+ const category = document.getElementById("category").value.trim();
+ const image = document.getElementById("image").value.trim();
+ const url = document.getElementById("url").value.trim();
+ const message = document.getElementById("message");
+ const button = document.getElementById("addButton");
+
+ if(!name || !category || !image || !url){
+  message.textContent = "Please fill all fields!";
+  return;
+ }
+
+ button.disabled = true;
+ message.textContent = "Saving game...";
+
+ try {
+  const response = await fetch("/api/games", {
+   method:"POST",
+   headers:{
+    "Content-Type":"application/json",
+    "x-admin-password":adminPassword
+   },
+   body:JSON.stringify({
+    title:name,
+    category:category,
+    image:image,
+    url:url
+   })
+  });
+
+  const result = await response.json();
+
+  if(response.status === 401){
+   logout();
+   throw new Error("Wrong Admin Password. Please login again.");
+  }
+
+  if(!response.ok){
+   throw new Error(result.error || "Game could not be saved.");
+  }
+
+  message.textContent = "Game saved permanently! 🎉";
+
+  document.getElementById("name").value = "";
+  document.getElementById("category").value = "";
+  document.getElementById("image").value = "";
+  document.getElementById("url").value = "";
+
+  await loadGames();
+
+ } catch(error) {
+  message.textContent = error.message;
+ } finally {
+  button.disabled = false;
+ }
+}
+
+loadGames();
 </script>
 </body>
 </html>
