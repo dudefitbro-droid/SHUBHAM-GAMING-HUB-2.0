@@ -3,7 +3,7 @@
 import { randomUUID } from "node:crypto";
 
 const OWNER = process.env.GITHUB_OWNER || "dudefitbro-droid";
-const REPO = process.env.GITHUB_REPO || "Shubham-Gaming-Hub";
+const REPO = process.env.GITHUB_REPO || "SHUBHAM-GAMING-HUB-2.0";
 const FILE = "games.json";
 
 const API = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`;
