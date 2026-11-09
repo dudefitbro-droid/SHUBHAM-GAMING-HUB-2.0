@@ -1,163 +1,186 @@
-import { timingSafeEqual } from "node:crypto";
+import { timingSafeEqual, randomUUID } from "node:crypto";
 
-const REPO = "dudefitbro-droid/Shubham-Gaming-Hub";
+const OWNER = process.env.OWNER || "dudefitbro-droid";
+const REPO = process.env.REPO || "Shubham-Gaming-Hub";
 const FILE = "games.json";
 
 function authorized(req) {
-  const savedPassword = process.env.ADMIN_PASSWORD;
-  const enteredPassword = req.headers["x-admin-password"];
+  const saved = process.env.ADMIN_PASSWORD;
+  const entered = req.headers["x-admin-password"];
 
-  if (!savedPassword || typeof enteredPassword !== "string") {
-    return false;
-  }
+  if (!saved || typeof entered !== "string") return false;
 
-  const a = Buffer.from(savedPassword);
-  const b = Buffer.from(enteredPassword);
+  const a = Buffer.from(saved);
+  const b = Buffer.from(entered);
 
   return a.length === b.length && timingSafeEqual(a, b);
 }
 
-function githubHeaders() {
-  const headers = {
-    Accept: "application/vnd.github+json"
+function headers() {
+  return {
+    Accept: "application/vnd.github+json",
+    Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+    "X-GitHub-Api-Version": "2022-11-28"
   };
+}
 
-  if (process.env.GITHUB_TOKEN) {
-    headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+function validUrl(value) {
+  try {
+    return ["http:", "https:"].includes(new URL(value).protocol);
+  } catch {
+    return false;
+  }
+}
+
+async function readGames() {
+  const endpoint =
+    `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`;
+
+  const response = await fetch(endpoint, { headers: headers() });
+
+  if (response.status === 404) return { games: [], sha: null };
+
+  if (!response.ok) throw new Error("GitHub read failed");
+
+  const data = await response.json();
+  const games = JSON.parse(
+    Buffer.from(data.content, "base64").toString("utf8")
+  );
+
+  if (!Array.isArray(games)) throw new Error("Invalid games file");
+
+  return {
+    games: games.map((g, i) => ({
+      id: g.id || `legacy-${i}-${Buffer.from(g.url || g.title || "").toString("base64url")}`,
+      title: g.title || g.name || "Untitled",
+      image: g.image || "",
+      category: g.category || "Other",
+      url: g.url || ""
+    })),
+    sha: data.sha
+  };
+}
+
+async function saveGames(games, sha, message) {
+  const endpoint =
+    `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`;
+
+  const response = await fetch(endpoint, {
+    method: "PUT",
+    headers: {
+      ...headers(),
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      message,
+      content: Buffer.from(
+        JSON.stringify(games, null, 2)
+      ).toString("base64"),
+      ...(sha ? { sha } : {})
+    })
+  });
+
+  if (response.status === 409 || response.status === 422) {
+    throw new Error("GitHub file changed. Please refresh and try again.");
   }
 
-  return headers;
+  if (!response.ok) throw new Error("GitHub save failed");
 }
 
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
 
-  if (req.method === "GET") {
-    try {
-      const response = await fetch(
-        `https://api.github.com/repos/${REPO}/contents/${FILE}`,
-        { headers: githubHeaders() }
-      );
-
-      if (response.status === 404) {
-        return res.status(200).json([]);
-      }
-
-      if (!response.ok) {
-        return res.status(500).json({ error: "GitHub read failed" });
-      }
-
-      const data = await response.json();
-      const games = JSON.parse(
-        Buffer.from(data.content, "base64").toString("utf8")
-      );
-
-      if (!Array.isArray(games)) {
-        return res.status(500).json({ error: "Invalid games data" });
-      }
-
+  try {
+    if (req.method === "GET") {
+      const { games } = await readGames();
       return res.status(200).json(games);
-    } catch {
-      return res.status(500).json({ error: "Could not load games" });
     }
-  }
 
-  if (req.method === "POST") {
+    if (!["POST", "PUT", "DELETE"].includes(req.method)) {
+      return res.status(405).json({ error: "Method not allowed" });
+    }
+
     if (!authorized(req)) {
       return res.status(401).json({ error: "Unauthorized admin" });
     }
 
     if (!process.env.GITHUB_TOKEN) {
-      return res.status(500).json({ error: "GitHub token missing" });
+      return res.status(500).json({ error: "GITHUB_TOKEN missing" });
     }
 
-    const { title, image, category, url } = req.body || {};
+    const { games, sha } = await readGames();
 
-    if (
-      typeof title !== "string" ||
-      typeof image !== "string" ||
-      typeof category !== "string" ||
-      typeof url !== "string" ||
-      !title.trim() ||
-      !image.trim() ||
-      !category.trim() ||
-      !url.trim()
-    ) {
-      return res.status(400).json({ error: "All fields are required" });
-    }
+    if (req.method === "POST" || req.method === "PUT") {
+      const { id, title, image, category, url } = req.body || {};
 
-    if (title.length > 100 || category.length > 50) {
-      return res.status(400).json({ error: "Text is too long" });
-    }
-
-    try {
-      for (const value of [image, url]) {
-        const parsed = new URL(value);
-        if (!["http:", "https:"].includes(parsed.protocol)) {
-          return res.status(400).json({ error: "Invalid URL" });
-        }
+      if (
+        typeof title !== "string" ||
+        typeof image !== "string" ||
+        typeof category !== "string" ||
+        typeof url !== "string" ||
+        !title.trim() || !image.trim() ||
+        !category.trim() || !url.trim()
+      ) {
+        return res.status(400).json({ error: "All fields are required" });
       }
 
-      const endpoint =
-        `https://api.github.com/repos/${REPO}/contents/${FILE}`;
-
-      const existing = await fetch(endpoint, {
-        headers: githubHeaders()
-      });
-
-      let games = [];
-      let sha;
-
-      if (existing.ok) {
-        const oldFile = await existing.json();
-        sha = oldFile.sha;
-        games = JSON.parse(
-          Buffer.from(oldFile.content, "base64").toString("utf8")
-        );
-
-        if (!Array.isArray(games)) {
-          return res.status(500).json({ error: "Invalid games file" });
-        }
-      } else if (existing.status !== 404) {
-        return res.status(500).json({ error: "Could not read games file" });
+      if (
+        title.length > 100 ||
+        category.length > 50 ||
+        image.length > 2000 ||
+        url.length > 2000 ||
+        !validUrl(image) ||
+        !validUrl(url)
+      ) {
+        return res.status(400).json({ error: "Invalid game details or URL" });
       }
 
-      games.push({
+      const game = {
+        id: req.method === "PUT" ? id : randomUUID(),
         title: title.trim(),
         image: image.trim(),
         category: category.trim(),
         url: url.trim()
-      });
+      };
 
-      const content = Buffer.from(
-        JSON.stringify(games, null, 2)
-      ).toString("base64");
+      if (req.method === "POST") {
+        games.push(game);
+      } else {
+        const index = games.findIndex(g => g.id === id);
 
-      const saved = await fetch(endpoint, {
-        method: "PUT",
-        headers: {
-          ...githubHeaders(),
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          message: "Add game from admin panel",
-          content,
-          ...(sha ? { sha } : {})
-        })
-      });
+        if (index === -1) {
+          return res.status(404).json({ error: "Game not found" });
+        }
 
-      if (!saved.ok) {
-        return res.status(500).json({ error: "GitHub save failed" });
+        games[index] = game;
       }
 
-      return res.status(201).json({
-        success: true,
-        message: "Game saved permanently"
-      });
-    } catch {
-      return res.status(500).json({ error: "Server error" });
-    }
-  }
+      await saveGames(
+        games,
+        sha,
+        req.method === "POST" ? "Add game from owner dashboard" : "Edit game from owner dashboard"
+      );
 
-  return res.status(405).json({ error: "Method not allowed" });
+      return res.status(200).json({ success: true, game });
+    }
+
+    if (req.method === "DELETE") {
+      const { id } = req.body || {};
+      const updated = games.filter(g => g.id !== id);
+
+      if (updated.length === games.length) {
+        return res.status(404).json({ error: "Game not found" });
+      }
+
+      await saveGames(updated, sha, "Delete game from owner dashboard");
+
+      return res.status(200).json({ success: true });
+    }
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      error: error.message || "Server error"
+    });
+  }
 }
