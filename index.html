@@ -1,94 +1,569 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SHUBHAM GAMING HUB 2.0</title>
+<meta name="theme-color" content="#070512">
+<title>SHUBHAM GAMING HUB 3.0</title>
+
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap');
+
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#070812;color:white;font-family:Arial,sans-serif;min-height:100vh}
-header{padding:25px 7%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #252542;background:#0b0c1b}
-.logo{font-size:23px;font-weight:900;color:#00eaff}
-.logo span{color:#a855f7}
-nav a{color:white;text-decoration:none;margin-left:20px}
-.hero{padding:75px 7%;text-align:center;background:radial-gradient(ellipse,#29205c,#070812 70%)}
-.hero h1{font-size:clamp(35px,7vw,70px);font-weight:900}
-.hero h1 span{color:#00eaff}
-.hero p{color:#aaa;margin:20px 0}
-.btn{background:linear-gradient(90deg,#00d9ff,#9b4dff);border:0;padding:14px 28px;color:white;border-radius:8px;font-weight:bold;cursor:pointer}
-.section{padding:45px 7%}
-.section h2{font-size:28px;margin-bottom:25px}
-.search{width:100%;padding:15px;border-radius:8px;border:1px solid #343454;background:#121426;color:white;margin-bottom:25px}
-.games{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:22px}
-.card{background:#131528;border:1px solid #292b48;border-radius:13px;overflow:hidden;transition:.3s}
-.card:hover{transform:translateY(-7px);border-color:#00eaff}
-.card img{width:100%;height:145px;object-fit:cover}
-.info{padding:16px}
-.info h3{margin-bottom:8px}
-.info p{color:#aaa;font-size:13px;margin-bottom:15px}
-.play{display:block;text-align:center;padding:11px;background:#672cff;color:white;text-decoration:none;border-radius:6px}
-.admin{background:#111426;padding:25px;border-radius:12px;border:1px solid #30304f}
-.admin input{display:block;width:100%;padding:13px;margin:10px 0;background:#080b18;color:white;border:1px solid #444;border-radius:6px}
-.admin-panel{display:none}
-.status{color:#00eaff;margin:15px 0}
-footer{text-align:center;padding:30px;color:#888}
-@media(max-width:600px){header{flex-direction:column;gap:15px}nav a{margin:0 8px}}
+
+:root{
+ --cyan:#00eaff;
+ --purple:#9b5cff;
+ --pink:#ff36cb;
+ --bg:#070512;
+ --panel:rgba(20,17,43,.78);
+}
+
+html{scroll-behavior:smooth}
+
+body{
+ background:var(--bg);
+ color:white;
+ font-family:Inter,Arial,sans-serif;
+ min-height:100vh;
+ overflow-x:hidden;
+}
+
+body:before{
+ content:"";
+ position:fixed;
+ inset:0;
+ z-index:-2;
+ background:
+ radial-gradient(ellipse at 15% 15%,#25105c 0,transparent 38%),
+ radial-gradient(ellipse at 85% 35%,#092e55 0,transparent 35%),
+ radial-gradient(ellipse at 50% 100%,#290b48 0,transparent 40%),
+ #070512;
+}
+
+body:after{
+ content:"";
+ position:fixed;
+ inset:0;
+ z-index:-1;
+ pointer-events:none;
+ opacity:.13;
+ background-image:
+ linear-gradient(rgba(0,234,255,.12) 1px,transparent 1px),
+ linear-gradient(90deg,rgba(0,234,255,.12) 1px,transparent 1px);
+ background-size:45px 45px;
+ mask-image:linear-gradient(to bottom,black,transparent 90%);
+}
+
+a{color:inherit;text-decoration:none}
+button,input{font:inherit}
+
+header{
+ position:sticky;
+ top:0;
+ z-index:100;
+ min-height:78px;
+ padding:15px 6%;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ gap:20px;
+ background:rgba(7,5,18,.83);
+ backdrop-filter:blur(18px);
+ border-bottom:1px solid rgba(0,234,255,.2);
+ box-shadow:0 5px 35px #0008;
+}
+
+.logo{
+ font-family:Orbitron,sans-serif;
+ font-weight:900;
+ font-size:clamp(16px,2vw,23px);
+ color:var(--cyan);
+ cursor:pointer;
+ text-shadow:0 0 18px #00eaff88;
+}
+
+.logo span{color:var(--purple)}
+
+nav{display:flex;gap:25px;align-items:center}
+nav a{font-size:13px;color:#ddd;transition:.3s}
+nav a:hover{color:var(--cyan);text-shadow:0 0 12px var(--cyan)}
+
+.hero{
+ min-height:550px;
+ padding:100px 6% 90px;
+ display:flex;
+ flex-direction:column;
+ justify-content:center;
+ align-items:center;
+ text-align:center;
+ position:relative;
+ overflow:hidden;
+}
+
+.hero:before{
+ content:"";
+ position:absolute;
+ width:420px;height:420px;
+ border-radius:50%;
+ background:#773cff33;
+ filter:blur(100px);
+ animation:glow 5s infinite alternate;
+}
+
+@keyframes glow{
+ from{transform:scale(.8);opacity:.5}
+ to{transform:scale(1.35);opacity:1}
+}
+
+.hero-content{position:relative;z-index:2}
+
+.tag{
+ display:inline-block;
+ padding:9px 18px;
+ border:1px solid #00eaff66;
+ border-radius:30px;
+ background:#00eaff0c;
+ color:var(--cyan);
+ font-size:11px;
+ letter-spacing:3px;
+ margin-bottom:25px;
+}
+
+.hero h1{
+ font-family:Orbitron,sans-serif;
+ font-size:clamp(35px,7vw,76px);
+ font-weight:900;
+ line-height:1.2;
+ letter-spacing:-2px;
+ text-shadow:0 0 35px #9b5cff66;
+}
+
+.hero h1 span{
+ background:linear-gradient(90deg,var(--cyan),#a77aff,var(--pink));
+ -webkit-background-clip:text;
+ background-clip:text;
+ color:transparent;
+}
+
+.hero p{
+ color:#aaa;
+ margin:22px 0 30px;
+ font-size:15px;
+ letter-spacing:1px;
+}
+
+.btn{
+ border:1px solid #ffffff30;
+ padding:14px 25px;
+ border-radius:8px;
+ color:white;
+ font-weight:800;
+ background:linear-gradient(110deg,#00bfe9,#773bff);
+ box-shadow:0 0 25px #6b42ff55;
+ cursor:pointer;
+ transition:.3s;
+}
+
+.btn:hover{
+ transform:translateY(-4px) scale(1.04);
+ box-shadow:0 0 35px #00eaff77;
+}
+
+.stats{
+ display:flex;
+ justify-content:center;
+ flex-wrap:wrap;
+ gap:45px;
+ margin-top:55px;
+}
+
+.stat strong{
+ display:block;
+ font-family:Orbitron;
+ color:var(--cyan);
+ font-size:25px;
+}
+
+.stat small{color:#888;font-size:11px}
+
+.section{padding:55px 7%}
+
+.section-heading{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ flex-wrap:wrap;
+ gap:15px;
+ margin-bottom:27px;
+}
+
+.section-heading h2{
+ font-family:Orbitron,sans-serif;
+ font-size:clamp(20px,3vw,29px);
+}
+
+.section-heading span{color:var(--cyan)}
+
+.search{
+ width:100%;
+ padding:17px 20px;
+ border-radius:12px;
+ border:1px solid #42406a;
+ outline:none;
+ background:rgba(18,15,39,.9);
+ color:white;
+ margin-bottom:20px;
+ box-shadow:inset 0 0 20px #0005;
+}
+
+.search:focus{border-color:var(--cyan);box-shadow:0 0 18px #00eaff33}
+
+.categories{
+ display:flex;
+ flex-wrap:wrap;
+ gap:10px;
+ margin-bottom:30px;
+}
+
+.category{
+ background:#15132a;
+ border:1px solid #39345d;
+ color:#ccc;
+ border-radius:30px;
+ padding:9px 17px;
+ cursor:pointer;
+ font-size:12px;
+ transition:.3s;
+}
+
+.category.active,.category:hover{
+ background:linear-gradient(90deg,#087eaa,#7035ca);
+ color:white;
+ border-color:var(--cyan);
+ box-shadow:0 0 15px #00eaff33;
+}
+
+.games{
+ display:grid;
+ grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
+ gap:25px;
+}
+
+.card{
+ position:relative;
+ background:linear-gradient(145deg,#211a3b,#0d1021);
+ border:1px solid #373057;
+ border-radius:16px;
+ overflow:hidden;
+ transform-style:preserve-3d;
+ transition:transform .35s,border-color .35s,box-shadow .35s;
+ box-shadow:0 12px 30px #0007;
+}
+
+.card:hover{
+ transform:perspective(900px) rotateX(4deg) rotateY(-4deg) translateY(-9px);
+ border-color:var(--cyan);
+ box-shadow:0 15px 35px #00d9ff25,0 0 20px #a855f733;
+}
+
+.card-image{
+ position:relative;
+ height:165px;
+ overflow:hidden;
+ background:#16142c;
+}
+
+.card img{
+ width:100%;
+ height:100%;
+ object-fit:cover;
+ transition:transform .5s;
+}
+
+.card:hover img{transform:scale(1.1)}
+
+.card-image:after{
+ content:"";
+ position:absolute;
+ inset:0;
+ background:linear-gradient(transparent 55%,#100c22);
+}
+
+.game-label{
+ position:absolute;
+ top:12px;
+ left:12px;
+ z-index:2;
+ padding:6px 11px;
+ border-radius:20px;
+ font-size:10px;
+ background:#00d9ffdd;
+ color:#07101b;
+ font-weight:800;
+}
+
+.info{padding:18px}
+
+.info h3{
+ font-family:Orbitron;
+ font-size:15px;
+ margin-bottom:8px;
+}
+
+.info p{font-size:12px;color:#aaa;margin-bottom:17px}
+
+.play{
+ display:block;
+ text-align:center;
+ padding:12px;
+ border-radius:7px;
+ background:linear-gradient(90deg,#672cff,#a12dff);
+ font-weight:800;
+ font-size:12px;
+ letter-spacing:1px;
+ transition:.3s;
+}
+
+.play:hover{
+ background:linear-gradient(90deg,#00aeea,#792cff);
+ box-shadow:0 0 20px #00eaff66;
+}
+
+.empty{
+ grid-column:1/-1;
+ text-align:center;
+ color:#999;
+ padding:55px 15px;
+ border:1px dashed #494168;
+ border-radius:15px;
+}
+
+.status{
+ color:var(--cyan);
+ font-size:13px;
+ margin:12px 0;
+}
+
+footer{
+ text-align:center;
+ padding:35px 15px;
+ color:#888;
+ border-top:1px solid #27223f;
+ background:#080614;
+ font-size:12px;
+}
+
+/* ADMIN MODAL */
+
+.admin-overlay{
+ display:none;
+ position:fixed;
+ inset:0;
+ z-index:500;
+ background:#03020beF;
+ backdrop-filter:blur(18px);
+ padding:20px;
+ overflow-y:auto;
+ align-items:center;
+ justify-content:center;
+}
+
+.admin-box{
+ width:100%;
+ max-width:490px;
+ padding:30px;
+ border:1px solid #00eaff66;
+ border-radius:18px;
+ background:linear-gradient(145deg,#1b1637,#0b1021);
+ box-shadow:0 0 50px #00eaff22;
+}
+
+.admin-box h2{
+ font-family:Orbitron;
+ font-size:21px;
+ margin-bottom:20px;
+ color:var(--cyan);
+}
+
+.admin-box input{
+ display:block;
+ width:100%;
+ padding:14px;
+ margin:12px 0;
+ border-radius:8px;
+ border:1px solid #46416b;
+ background:#080b18;
+ color:white;
+ outline:none;
+}
+
+.admin-box input:focus{border-color:var(--cyan)}
+
+.admin-actions{display:flex;gap:10px;flex-wrap:wrap}
+.admin-actions button{flex:1}
+
+.close-btn{
+ background:#29213f;
+ border:1px solid #555;
+ padding:12px;
+ border-radius:8px;
+ color:white;
+ cursor:pointer;
+}
+
+@media(max-width:650px){
+ header{padding:15px 4%;flex-direction:column}
+ nav{gap:18px}
+ nav a{font-size:12px}
+ .hero{min-height:480px;padding:75px 5%}
+ .stats{gap:25px}
+ .section{padding:40px 5%}
+ .games{grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:13px}
+ .card-image{height:125px}
+ .info{padding:12px}
+ .info h3{font-size:12px}
+ .play{font-size:10px;padding:10px}
+ .admin-box{padding:22px}
+}
+
 </style>
 </head>
+
 <body>
 
 <header>
- <div class="logo">SHUBHAM <span>GAMING HUB</span></div>
+ <div class="logo" id="secretLogo">
+  SHUBHAM <span>GAMING HUB</span>
+ </div>
+
  <nav>
-  <a href="#home">Home</a>
-  <a href="#games">Games</a>
-  <a href="#admin">Admin</a>
+  <a href="#home">HOME</a>
+  <a href="#games">GAMES</a>
+  <a href="#about">ABOUT</a>
  </nav>
 </header>
 
 <section class="hero" id="home">
- <h1>ENTER THE <span>GAMEVERSE</span></h1>
- <p>One Hub. Unlimited Games. Endless Fun.</p>
- <button class="btn" onclick="document.getElementById('games').scrollIntoView({behavior:'smooth'})">EXPLORE GAMES</button>
-</section>
+ <div class="hero-content">
+  <div class="tag">✦ NEXT GENERATION GAMING ✦</div>
 
-<section class="section" id="games">
- <h2>🎮 EXPLORE GAMES</h2>
- <input class="search" id="search" placeholder="Search your favourite game..." oninput="renderGames()">
- <p id="loading" class="status">Loading games...</p>
- <div class="games" id="gameList"></div>
-</section>
+  <h1>ENTER THE<br><span>GAMEVERSE</span></h1>
 
-<section class="section" id="admin">
- <h2>🔐 ADMIN PANEL</h2>
- <div class="admin">
-  <div id="loginPanel">
-   <p>Admin access only.</p>
-   <button class="btn" onclick="adminLogin()">ADMIN LOGIN</button>
-  </div>
+  <p>ONE HUB. UNLIMITED GAMES. ENDLESS FUN.</p>
 
-  <div id="adminPanel" class="admin-panel">
-   <h3>➕ ADD NEW GAME</h3>
-   <input id="name" placeholder="Game Name">
-   <input id="category" placeholder="Game Category">
-   <input id="image" placeholder="Thumbnail Image URL">
-   <input id="url" placeholder="Playable Game URL">
-   <button class="btn" id="addButton" onclick="addGame()">SAVE GAME</button>
-   <p id="message" class="status"></p>
-   <button class="btn" onclick="logout()" style="margin-top:12px">LOGOUT</button>
+  <button class="btn" onclick="document.getElementById('games').scrollIntoView({behavior:'smooth'})">
+   EXPLORE GAMES ⚡
+  </button>
+
+  <div class="stats">
+   <div class="stat">
+    <strong id="gameCount">02</strong>
+    <small>AVAILABLE GAMES</small>
+   </div>
+   <div class="stat">
+    <strong>24/7</strong>
+    <small>GAMING ACCESS</small>
+   </div>
+   <div class="stat">
+    <strong>100%</strong>
+    <small>FUN ZONE</small>
+   </div>
   </div>
  </div>
 </section>
 
-<footer>© 2026 SHUBHAM GAMING HUB 2.0 | ALL RIGHTS RESERVED</footer>
+<section class="section" id="games">
+
+ <div class="section-heading">
+  <h2>🎮 <span>EXPLORE</span> GAMES</h2>
+  <span>SELECT YOUR GAME ▶</span>
+ </div>
+
+ <input
+  class="search"
+  id="search"
+  placeholder="🔍 Search your favourite game..."
+  oninput="renderGames()"
+ >
+
+ <div class="categories" id="categories">
+  <button class="category active" data-category="All">ALL GAMES</button>
+  <button class="category" data-category="Racing">RACING</button>
+  <button class="category" data-category="Action">ACTION</button>
+  <button class="category" data-category="Adventure">ADVENTURE</button>
+  <button class="category" data-category="Puzzle">PUZZLE</button>
+  <button class="category" data-category="Sports">SPORTS</button>
+ </div>
+
+ <p id="loading" class="status">CONNECTING TO GAME SERVER...</p>
+
+ <div class="games" id="gameList"></div>
+</section>
+
+<section class="section" id="about">
+ <div class="section-heading">
+  <h2>ABOUT <span>GAME HUB</span></h2>
+ </div>
+ <p style="color:#aaa;line-height:1.9;font-size:14px">
+  Welcome to SHUBHAM GAMING HUB — your destination for online browser gaming.
+  Explore different games, discover new challenges and enjoy the Gameverse.
+ </p>
+</section>
+
+<footer>
+ © 2026 SHUBHAM GAMING HUB 3.0
+ <br><br>
+ POWERED BY SHUBHAM
+</footer>
+
+<!-- SECRET ADMIN PANEL -->
+
+<div class="admin-overlay" id="adminOverlay">
+ <div class="admin-box">
+
+  <h2>👑 ADMIN CONTROL</h2>
+
+  <div id="adminLogin">
+   <p style="color:#aaa;font-size:13px;margin-bottom:15px">
+    Restricted administrator access.
+   </p>
+   <input type="password" id="adminPassword" placeholder="Enter Admin Password">
+
+   <div class="admin-actions">
+    <button class="btn" onclick="adminLogin()">LOGIN</button>
+    <button class="close-btn" onclick="closeAdmin()">CLOSE</button>
+   </div>
+  </div>
+
+  <div id="adminPanel" style="display:none">
+   <h3 style="margin-bottom:15px">➕ ADD NEW GAME</h3>
+
+   <input id="name" placeholder="Game Name">
+   <input id="category" placeholder="Game Category">
+   <input id="image" placeholder="Thumbnail Image URL">
+   <input id="url" placeholder="Playable Game URL">
+
+   <div class="admin-actions">
+    <button class="btn" id="addButton" onclick="addGame()">SAVE GAME</button>
+    <button class="close-btn" onclick="logout()">LOGOUT</button>
+   </div>
+
+   <p id="message" class="status"></p>
+  </div>
+
+ </div>
+</div>
 
 <script>
+
 const defaultGames = [
  {
   name:"Nitro Rush",
   category:"Racing",
   image:"https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=600",
-  url:"https://nitrogam-shubham.vercel.app"
+  url:"https://nitrorush-shubham.vercel.app/"
  },
  {
   name:"Super Runner",
@@ -100,12 +575,16 @@ const defaultGames = [
 
 let games = [...defaultGames];
 let adminPassword = "";
+let activeCategory = "All";
+let logoTaps = 0;
+let logoTapTimer;
 
 async function loadGames(){
+
  const loading = document.getElementById("loading");
 
- try {
-  const response = await fetch("/api/games", {cache:"no-store"});
+ try{
+  const response = await fetch("/api/games",{cache:"no-store"});
 
   if(!response.ok) throw new Error("API unavailable");
 
@@ -113,44 +592,80 @@ async function loadGames(){
 
   if(!Array.isArray(savedGames)) throw new Error("Invalid data");
 
-  const converted = savedGames.map(g => ({
-   name:g.title,
-   category:g.category,
+  const converted = savedGames.map(g=>({
+   name:g.title || g.name,
+   category:g.category || "Other",
    image:g.image,
    url:g.url
   }));
 
-  const urls = new Set(converted.map(g => g.url));
+  const urls = new Set(converted.map(g=>g.url));
 
   games = [
-   ...defaultGames.filter(g => !urls.has(g.url)),
+   ...defaultGames.filter(g=>!urls.has(g.url)),
    ...converted
   ];
 
-  loading.textContent = "Games loaded successfully!";
- } catch(error) {
-  loading.textContent = "Showing default games. Saved games could not be loaded.";
+  loading.textContent = "✓ GAME SERVER CONNECTED";
+
+ }catch(error){
+
+  loading.textContent = "Showing default games. Saved games unavailable.";
+
  }
 
  renderGames();
 }
 
 function renderGames(){
+
  const list = document.getElementById("gameList");
  const query = document.getElementById("search").value.toLowerCase();
 
  list.innerHTML = "";
 
- games.filter(g =>
-  (g.name+" "+g.category).toLowerCase().includes(query)
- ).forEach(g => {
+ const filtered = games.filter(g=>{
+
+  const matchesSearch = (g.name+" "+g.category).toLowerCase().includes(query);
+
+  const matchesCategory =
+   activeCategory === "All" ||
+   g.category.toLowerCase() === activeCategory.toLowerCase();
+
+  return matchesSearch && matchesCategory;
+
+ });
+
+ document.getElementById("gameCount").textContent =
+  String(games.length).padStart(2,"0");
+
+ if(filtered.length === 0){
+  list.innerHTML = '<div class="empty">NO GAMES FOUND ⚡<br><br>Try another search.</div>';
+  return;
+ }
+
+ filtered.forEach(g=>{
+
   const card = document.createElement("div");
   card.className = "card";
+
+  const imageBox = document.createElement("div");
+  imageBox.className = "card-image";
 
   const img = document.createElement("img");
   img.src = g.image;
   img.alt = g.name;
   img.loading = "lazy";
+
+  img.onerror = function(){
+   this.src = "https://placehold.co/600x400/15132a/00eaff?text=GAME";
+  };
+
+  const label = document.createElement("span");
+  label.className = "game-label";
+  label.textContent = g.category;
+
+  imageBox.append(img,label);
 
   const info = document.createElement("div");
   info.className = "info";
@@ -159,46 +674,118 @@ function renderGames(){
   title.textContent = g.name;
 
   const category = document.createElement("p");
-  category.textContent = g.category;
+  category.textContent = "✦ "+g.category+" GAME";
 
   const link = document.createElement("a");
   link.className = "play";
   link.href = g.url;
   link.target = "_blank";
-  link.rel = "noopener";
-  link.textContent = "PLAY NOW ▶️";
+  link.rel = "noopener noreferrer";
+  link.textContent = "PLAY NOW ▶";
 
   info.append(title,category,link);
-  card.append(img,info);
+  card.append(imageBox,info);
   list.append(card);
+
  });
+
+}
+
+document.getElementById("categories").addEventListener("click",function(e){
+
+ const button = e.target.closest(".category");
+ if(!button) return;
+
+ activeCategory = button.dataset.category;
+
+ document.querySelectorAll(".category").forEach(b=>{
+  b.classList.remove("active");
+ });
+
+ button.classList.add("active");
+
+ renderGames();
+
+});
+
+// SECRET ADMIN ACCESS: CTRL + SHIFT + A
+
+document.addEventListener("keydown",function(e){
+
+ if(e.ctrlKey && e.shiftKey && e.key.toLowerCase()==="a"){
+  e.preventDefault();
+  openAdmin();
+ }
+
+});
+
+document.getElementById("secretLogo").addEventListener("click",function(){
+
+ logoTaps++;
+
+ clearTimeout(logoTapTimer);
+
+ logoTapTimer = setTimeout(()=>{
+  logoTaps = 0;
+ },1200);
+
+ if(logoTaps >= 5){
+  logoTaps = 0;
+  openAdmin();
+ }
+
+});
+
+function openAdmin(){
+
+ document.getElementById("adminOverlay").style.display="flex";
+
+}
+
+function closeAdmin(){
+
+ document.getElementById("adminOverlay").style.display="none";
+
 }
 
 function adminLogin(){
- const password = prompt("Enter your Admin Password:");
 
- if(password === null || !password) return;
+ const password = document.getElementById("adminPassword").value;
+
+ if(!password){
+  alert("Enter Admin Password");
+  return;
+ }
 
  adminPassword = password;
 
- document.getElementById("loginPanel").style.display = "none";
- document.getElementById("adminPanel").style.display = "block";
+ document.getElementById("adminLogin").style.display="none";
+ document.getElementById("adminPanel").style.display="block";
 
  document.getElementById("message").textContent =
- "Enter game details and save. Password will be verified by server.";
+ "Ready. Server will verify your password when saving.";
+
 }
 
 function logout(){
+
  adminPassword = "";
- document.getElementById("adminPanel").style.display = "none";
- document.getElementById("loginPanel").style.display = "block";
+
+ document.getElementById("adminPassword").value="";
+ document.getElementById("adminPanel").style.display="none";
+ document.getElementById("adminLogin").style.display="block";
+
+ closeAdmin();
+
 }
 
 async function addGame(){
+
  const name = document.getElementById("name").value.trim();
  const category = document.getElementById("category").value.trim();
  const image = document.getElementById("image").value.trim();
  const url = document.getElementById("url").value.trim();
+
  const message = document.getElementById("message");
  const button = document.getElementById("addButton");
 
@@ -207,52 +794,69 @@ async function addGame(){
   return;
  }
 
- button.disabled = true;
- message.textContent = "Saving game...";
+ if(!/^https?:\/\//i.test(image) || !/^https?:\/\//i.test(url)){
+  message.textContent = "Please enter valid HTTP/HTTPS image and game URLs.";
+  return;
+ }
 
- try {
-  const response = await fetch("/api/games", {
+ button.disabled = true;
+ message.textContent = "SAVING GAME...";
+
+ try{
+
+  const response = await fetch("/api/games",{
+
    method:"POST",
+
    headers:{
     "Content-Type":"application/json",
     "x-admin-password":adminPassword
    },
+
    body:JSON.stringify({
     title:name,
     category:category,
     image:image,
     url:url
    })
+
   });
 
   const result = await response.json();
 
-  if(response.status === 401){
+  if(response.status===401){
    logout();
-   throw new Error("Wrong Admin Password. Please login again.");
+   throw new Error("Incorrect Admin Password. Login again.");
   }
 
   if(!response.ok){
    throw new Error(result.error || "Game could not be saved.");
   }
 
-  message.textContent = "Game saved permanently! 🎉";
+  message.textContent = "✓ GAME SAVED PERMANENTLY!";
 
-  document.getElementById("name").value = "";
-  document.getElementById("category").value = "";
-  document.getElementById("image").value = "";
-  document.getElementById("url").value = "";
+  document.getElementById("name").value="";
+  document.getElementById("category").value="";
+  document.getElementById("image").value="";
+  document.getElementById("url").value="";
 
   await loadGames();
 
- } catch(error) {
+ }catch(error){
+
   message.textContent = error.message;
- } finally {
-  button.disabled = false;
+
+ }finally{
+
+  button.disabled=false;
+
  }
+
 }
 
 loadGames();
+
 </script>
+
 </body>
 </html>
