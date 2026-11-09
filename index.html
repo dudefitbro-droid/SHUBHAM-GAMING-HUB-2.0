@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SHUBHAM GAMING HUB 2.0</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#070812;color:white;font-family:Arial,sans-serif;min-height:100vh}
+header{padding:25px 7%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #252542;background:#0b0c1b}
+.logo{font-size:23px;font-weight:900;color:#00eaff}
+.logo span{color:#a855f7}
+nav a{color:white;text-decoration:none;margin-left:20px}
+.hero{padding:75px 7%;text-align:center;background:radial-gradient(ellipse,#29205c,#070812 70%)}
+.hero h1{font-size:clamp(35px,7vw,70px);font-weight:900}
+.hero h1 span{color:#00eaff}
+.hero p{color:#aaa;margin:20px 0}
+.btn{background:linear-gradient(90deg,#00d9ff,#9b4dff);border:0;padding:14px 28px;color:white;border-radius:8px;font-weight:bold;cursor:pointer}
+.section{padding:45px 7%}
+.section h2{font-size:28px;margin-bottom:25px}
+.search{width:100%;padding:15px;border-radius:8px;border:1px solid #343454;background:#121426;color:white;margin-bottom:25px}
+.games{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:22px}
+.card{background:#131528;border:1px solid #292b48;border-radius:13px;overflow:hidden;transition:.3s}
+.card:hover{transform:translateY(-7px);border-color:#00eaff}
+.card img{width:100%;height:145px;object-fit:cover}
+.info{padding:16px}
+.info h3{margin-bottom:8px}
+.info p{color:#aaa;font-size:13px;margin-bottom:15px}
+.play{display:block;text-align:center;padding:11px;background:#672cff;color:white;text-decoration:none;border-radius:6px}
+.admin{background:#111426;padding:25px;border-radius:12px;border:1px solid #30304f}
+.admin input{display:block;width:100%;padding:13px;margin:10px 0;background:#080b18;color:white;border:1px solid #444;border-radius:6px}
+footer{text-align:center;padding:30px;color:#888}
+@media(max-width:600px){header{flex-direction:column;gap:15px}nav a{margin:0 8px}}
+</style>
+</head>
+<body>
+<header>
+ <div class="logo">SHUBHAM <span>GAMING HUB</span></div>
+ <nav><a href="#home">Home</a><a href="#games">Games</a><a href="#admin">Add Game</a></nav>
+</header>
+<section class="hero" id="home">
+ <h1>ENTER THE <span>GAMEVERSE</span></h1>
+ <p>One Hub. Unlimited Games. Endless Fun.</p>
+ <button class="btn" onclick="document.getElementById('games').scrollIntoView({behavior:'smooth'})">EXPLORE GAMES</button>
+</section>
+<section class="section" id="games">
+ <h2>🎮 EXPLORE GAMES</h2>
+ <input class="search" id="search" placeholder="Search your favourite game..." oninput="renderGames()">
+ <div class="games" id="gameList"></div>
+</section>
+<section class="section" id="admin">
+ <h2>➕ ADD YOUR GAME</h2>
+ <div class="admin">
+  <input id="name" placeholder="Game Name">
+  <input id="category" placeholder="Game Category">
+  <input id="image" placeholder="Thumbnail Image URL">
+  <input id="url" placeholder="Playable Game URL">
+  <button class="btn" onclick="addGame()">ADD GAME</button>
+ </div>
+</section>
+<footer>© 2026 SHUBHAM GAMING HUB 2.0 | ALL RIGHTS RESERVED</footer>
+<script>
+const defaultGames = [
+ {name:"Nitro Rush",category:"Racing",image:"https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=600",url:"https://nitrogam-shubham.vercel.app"},
+ {name:"Super Runner",category:"Adventure",image:"https://images.unsplash.com/photo-1511512578047-dfb367046420?w=600",url:"#"}
+];
+let games = JSON.parse(localStorage.getItem("shubhamGames")) || defaultGames;
+function renderGames(){
+ const list=document.getElementById("gameList");
+ const query=document.getElementById("search").value.toLowerCase();
+ list.innerHTML="";
+ games.filter(g=>(g.name+" "+g.category).toLowerCase().includes(query)).forEach(g=>{
+  const card=document.createElement("div"); card.className="card";
+  const img=document.createElement("img"); img.src=g.image; img.alt=g.name;
+  const info=document.createElement("div"); info.className="info";
+  const title=document.createElement("h3"); title.textContent=g.name;
+  const category=document.createElement("p"); category.textContent=g.category;
+  const link=document.createElement("a"); link.className="play"; link.href=g.url; link.target="_blank"; link.rel="noopener"; link.textContent="PLAY NOW ▶";
+  info.append(title,category,link); card.append(img,info); list.append(card);
+ });
+}
+function addGame(){
+ const name=document.getElementById("name").value.trim();
+ const category=document.getElementById("category").value.trim();
+ const image=document.getElementById("image").value.trim();
+ const url=document.getElementById("url").value.trim();
+ if(!name||!category||!image||!url){alert("Please fill all fields!");return;}
+ games.push({name,category,image,url});
+ localStorage.setItem("shubhamGames",JSON.stringify(games));
+ document.querySelectorAll(".admin input").forEach(i=>i.value="");
+ renderGames(); alert("Game Added Successfully!");
+}
+renderGames();
+</script>
+</body>
+</html>
