@@ -1,4 +1,5 @@
 
+
 import { randomUUID } from "node:crypto";
 
 const OWNER = process.env.GITHUB_OWNER || "dudefitbro-droid";
@@ -32,11 +33,10 @@ async function github(method, body) {
 async function readGames() {
   try {
     const data = await github("GET");
+    const content = Buffer.from(data.content, "base64").toString("utf8");
 
     return {
-      games: JSON.parse(
-        Buffer.from(data.content, "base64").toString("utf8")
-      ),
+      games: JSON.parse(content),
       sha: data.sha
     };
   } catch (error) {
@@ -59,17 +59,16 @@ async function saveGames(games, sha) {
 
   if (sha) body.sha = sha;
 
-  await github("PUT", body);
+  return await github("PUT", body);
 }
 
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
 
   try {
-    if (!process.env.GITHUB_TOKEN ||
-        !process.env.ADMIN_PASSWORD) {
+    if (!process.env.GITHUB_TOKEN || !process.env.ADMIN_PASSWORD) {
       return res.status(500).json({
-        error: "Missing environment variables"
+        error: "Missing GITHUB_TOKEN or ADMIN_PASSWORD"
       });
     }
 
@@ -108,7 +107,7 @@ export default async function handler(req, res) {
     if (action === "add") {
       if (!game?.title || !game?.image || !game?.url) {
         return res.status(400).json({
-          error: "Missing game details"
+          error: "Title, image and URL are required"
         });
       }
 
@@ -168,10 +167,10 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error("GAMES API ERROR:", error);
 
-  return res.status(500).json({
-  error: error.message || "Server error",
-  githubStatus: error.status || null,
-  repo: `${OWNER}/${REPO}`
-});
+    return res.status(500).json({
+      error: error.message || "Server error",
+      githubStatus: error.status || null,
+      repo: `${OWNER}/${REPO}`
+    });
   }
 }
