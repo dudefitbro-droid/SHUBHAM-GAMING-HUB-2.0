@@ -1,0 +1,347 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NITRO BIKE 3D</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{overflow:hidden;background:#050816;color:white;font-family:Arial}
+canvas{display:block}
+#ui{position:absolute;inset:0;pointer-events:none}
+.top{
+display:flex;justify-content:space-between;
+padding:20px;font-weight:bold;
+text-shadow:0 0 12px cyan
+}
+.score{font-size:22px;color:#00f5ff}
+#start{
+position:absolute;inset:0;background:#030713dd;
+display:flex;align-items:center;justify-content:center;
+flex-direction:column;text-align:center;gap:18px;
+pointer-events:auto
+}
+h1{font-size:38px;color:#00f5ff;
+text-shadow:0 0 20px cyan}
+button{
+border:2px solid #00eaff;background:#07182d;
+color:white;padding:15px 28px;border-radius:12px;
+font-size:18px;font-weight:bold;cursor:pointer;
+box-shadow:0 0 18px #00dfff
+}
+#controls{
+position:absolute;bottom:25px;width:100%;
+display:flex;justify-content:space-between;
+padding:0 25px;pointer-events:auto
+}
+.control{width:75px;height:65px;font-size:25px}
+#nitro{position:absolute;bottom:105px;right:25px;
+pointer-events:auto;border-color:#ff8a00}
+#gameover{display:none;position:absolute;inset:0;
+background:#000c;align-items:center;
+justify-content:center;flex-direction:column;gap:20px;
+pointer-events:auto}
+</style>
+</head>
+<body>
+
+<div id="ui">
+ <div class="top">
+  <div>NITRO BIKE 3D</div>
+  <div class="score">SCORE: <span id="score">0</span></div>
+ </div>
+
+ <div id="start">
+  <h1>🏍️ NITRO BIKE 3D</h1>
+  <p>EXTREME HIGHWAY RACING</p>
+  <button onclick="startGame()">START RACE</button>
+  <p>Use arrow keys or touch controls</p>
+ </div>
+
+ <div id="controls">
+  <button class="control" id="left">⬅</button>
+  <button class="control" id="right">➡</button>
+ </div>
+ <button id="nitro">⚡ NITRO</button>
+
+ <div id="gameover">
+  <h1>CRASHED!</h1>
+  <h2>Score: <span id="finalScore">0</span></h2>
+  <button onclick="startGame()">RACE AGAIN</button>
+ </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+let scene,camera,renderer,bike;
+let roadLines=[],obstacles=[];
+let running=false,score=0,speed=0.55;
+let bikeX=0,nitro=false;
+let keys={left:false,right:false};
+let audioCtx,engineOsc;
+
+scene=new THREE.Scene();
+scene.background=new THREE.Color(0x07152c);
+scene.fog=new THREE.Fog(0x07152c,25,110);
+
+camera=new THREE.PerspectiveCamera(
+65,innerWidth/innerHeight,0.1,200
+);
+camera.position.set(0,5,9);
+camera.lookAt(0,1,-5);
+
+renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled=true;
+document.body.appendChild(renderer.domElement);
+
+scene.add(new THREE.HemisphereLight(0x9edfff,0x222233,2));
+
+let sun=new THREE.DirectionalLight(0xffffff,2);
+sun.position.set(5,10,5);
+scene.add(sun);
+
+function material(color,metal=0){
+return new THREE.MeshStandardMaterial({
+color,metalness:metal,roughness:0.4
+});
+}
+
+let black=material(0x111111);
+let roadMat=material(0x222831);
+let blue=material(0x00cfff,0.7);
+let red=material(0xff2929);
+let white=material(0xffffff);
+
+function box(w,h,d,x,y,z,mat,parent=scene){
+let m=new THREE.Mesh(
+new THREE.BoxGeometry(w,h,d),mat
+);
+m.position.set(x,y,z);
+m.castShadow=true;
+m.receiveShadow=true;
+parent.add(m);
+return m;
+}
+
+// Road
+box(12,.2,180,0,-.2,-65,roadMat);
+
+// Road boundaries
+box(.25,.25,180,-6,-.02,-65,white);
+box(.25,.25,180,6,-.02,-65,white);
+
+// Lane markings
+for(let z=15;z>-150;z-=7){
+ for(let x of [-2,2]){
+ let line=box(.12,.04,3,x,-.075,z,white);
+ roadLines.push(line);
+ }
+}
+
+// Ground
+box(200,.3,200,0,-.45,-70,material(0x102b22));
+
+// Trees
+for(let i=0;i<45;i++){
+ let z=10-i*4;
+ for(let x of [-9,9]){
+ let trunk=box(.35,2,.35,x,.8,z,material(0x70421f));
+ let leaves=new THREE.Mesh(
+ new THREE.ConeGeometry(1.2,3,7),
+ material(0x087b42)
+ );
+ leaves.position.set(x,3,z);
+ scene.add(leaves);
+ }
+}
+
+// Bike model
+bike=new THREE.Group();
+scene.add(bike);
+
+function wheel(x,z){
+ let w=new THREE.Mesh(
+ new THREE.TorusGeometry(.48,.13,12,24),
+ black
+ );
+ w.rotation.y=Math.PI/2;
+ w.position.set(x,.55,z);
+ bike.add(w);
+
+ let hub=new THREE.Mesh(
+ new THREE.CylinderGeometry(.12,.12,.18,16),
+ material(0xaaaaaa,.8)
+ );
+ hub.rotation.z=Math.PI/2;
+ hub.position.copy(w.position);
+ bike.add(hub);
+}
+
+wheel(0,1.05);
+wheel(0,-1.05);
+
+// Bike body
+box(.65,.45,1.4,0,1.15,0,blue,bike);
+box(.5,.5,.65,0,1.55,-.15,red,bike);
+box(.35,.18,.65,0,1.85,-.3,black,bike);
+
+// Handle
+box(1.2,.1,.12,0,1.8,.8,material(0xcccccc),bike);
+
+// Rider
+let rider= new THREE.Mesh(
+ new THREE.SphereGeometry(.38,16,16),
+ material(0x202020)
+);
+rider.position.set(0,2.15,-.1);
+bike.add(rider);
+
+let helmet=new THREE.Mesh(
+ new THREE.SphereGeometry(.3,16,16),
+ blue
+);
+helmet.position.set(0,2.65,-.1);
+bike.add(helmet);
+
+bike.position.set(0,0,2);
+
+// Obstacles
+function createObstacle(){
+ let car=new THREE.Group();
+ let color=[0xff3030,0xffcc00,0xeeeeee][
+ Math.floor(Math.random()*3)
+ ];
+ box(1.5,.9,2,0,.65,0,material(color),car);
+ box(1.2,.35,.7,0,1.25,-.2,white,car);
+ car.position.set([-4,-2,2,4][
+ Math.floor(Math.random()*4)
+ ],0,-100);
+ scene.add(car);
+ obstacles.push(car);
+}
+
+function sound(){
+ try{
+ audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+ engineOsc=audioCtx.createOscillator();
+ let gain=audioCtx.createGain();
+ engineOsc.type="sawtooth";
+ engineOsc.frequency.value=75;
+ gain.gain.value=.025;
+ engineOsc.connect(gain);
+ gain.connect(audioCtx.destination);
+ engineOsc.start();
+ }catch(e){}
+}
+
+function startGame(){
+ document.getElementById("start").style.display="none";
+ document.getElementById("gameover").style.display="none";
+
+ obstacles.forEach(o=>scene.remove(o));
+ obstacles=[];
+ score=0;speed=.55;bikeX=0;nitro=false;
+ bike.position.x=0;
+ running=true;
+ if(!audioCtx)sound();
+ animate();
+}
+
+function crash(){
+ running=false;
+ document.getElementById("finalScore").textContent=score;
+ document.getElementById("gameover").style.display="flex";
+}
+
+function animate(){
+ if(!running)return;
+ requestAnimationFrame(animate);
+
+ let currentSpeed=nitro?1.25:speed;
+
+ if(keys.left)bikeX-=.12;
+ if(keys.right)bikeX+=.12;
+
+ bikeX=Math.max(-4.7,Math.min(4.7,bikeX));
+ bike.position.x+=(bikeX-bike.position.x)*.15;
+ bike.rotation.z=(bike.position.x-bikeX)*.12;
+
+ roadLines.forEach(line=>{
+ line.position.z+=currentSpeed*1.7;
+ if(line.position.z>10)line.position.z=-150;
+ });
+
+ if(Math.random()<.025)createObstacle();
+
+ obstacles.forEach((o,i)=>{
+ o.position.z+=currentSpeed;
+
+ if(Math.abs(o.position.x-bike.position.x)<1.2 &&
+ Math.abs(o.position.z-bike.position.z)<1.4){
+ crash();
+ }
+
+ if(o.position.z>12){
+ scene.remove(o);
+ obstacles.splice(i,1);
+ score+=10;
+ document.getElementById("score").textContent=score;
+ }
+ });
+
+ if(score>0 && score%100===0)speed=Math.min(.9,.55+score/2000);
+
+ camera.position.x+=(bike.position.x*.3-camera.position.x)*.04;
+ camera.lookAt(bike.position.x*.2,1,-5);
+
+ if(engineOsc){
+ engineOsc.frequency.value=nitro?150:75;
+ }
+
+ renderer.render(scene,camera);
+}
+
+// Keyboard
+window.addEventListener("keydown",e=>{
+ if(e.key==="ArrowLeft"||e.key==="a")keys.left=true;
+ if(e.key==="ArrowRight"||e.key==="d")keys.right=true;
+ if(e.key===" "){nitro=true}
+});
+window.addEventListener("keyup",e=>{
+ if(e.key==="ArrowLeft"||e.key==="a")keys.left=false;
+ if(e.key==="ArrowRight"||e.key==="d")keys.right=false;
+ if(e.key===" ")nitro=false;
+});
+
+// Touch controls
+function hold(id,key){
+ let el=document.getElementById(id);
+ el.addEventListener("pointerdown",e=>{
+ e.preventDefault();keys[key]=true;
+ });
+ ["pointerup","pointerleave","pointercancel"].forEach(ev=>{
+ el.addEventListener(ev,()=>keys[key]=false);
+ });
+}
+hold("left","left");
+hold("right","right");
+
+let n=document.getElementById("nitro");
+n.addEventListener("pointerdown",()=>nitro=true);
+["pointerup","pointerleave","pointercancel"].forEach(ev=>{
+ n.addEventListener(ev,()=>nitro=false);
+});
+
+window.addEventListener("resize",()=>{
+ camera.aspect=innerWidth/innerHeight;
+ camera.updateProjectionMatrix();
+ renderer.setSize(innerWidth,innerHeight);
+});
+
+renderer.render(scene,camera);
+</script>
+</body>
+</html>
