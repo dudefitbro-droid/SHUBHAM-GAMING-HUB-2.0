@@ -416,7 +416,12 @@ async function saveGame(){
   });
 
   const data=await res.json();
-  if(!res.ok)throw new Error(data.error||"Save failed");
+  if(!res.ok)throw new Error(
+ (data.error||"Save failed")+
+ " | HTTP: "+res.status+
+ " | GitHub: "+(data.githubStatus??"N/A")+
+ " | Repo: "+(data.repo??"N/A")
+);
 
   games=data.games;
   renderGames();
