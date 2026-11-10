@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SHUBHAM GANGSTER CITY 3D</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{overflow:hidden;background:#080b12;font-family:Arial;color:white}
+canvas{display:block}
+#menu{position:fixed;inset:0;z-index:5;background:linear-gradient(#07101bdc,#050812ee),radial-gradient(circle at center,#263b54,#050812);display:flex;align-items:center;justify-content:center;text-align:center;padding:20px}
+.panel{max-width:520px;width:100%;padding:30px 20px;border:1px solid #35d9ff66;border-radius:20px;background:#081321dd;box-shadow:0 0 35px #00c8ff33}
+h1{font-size:clamp(28px,7vw,48px);color:#36ddff;text-shadow:0 0 18px #00bfff;margin-bottom:12px}
+.panel p{color:#c6d6e8;line-height:1.6;margin:12px 0 22px}
+button{border:0;border-radius:12px;padding:13px 20px;background:#00c9ff;color:#00131c;font-weight:bold;font-size:15px;cursor:pointer}
+#hud{position:fixed;inset:0;pointer-events:none;display:none}
+.stat{position:absolute;top:14px;padding:10px 13px;background:#06101dcc;border:1px solid #38dfff77;border-radius:10px;font-weight:bold}
+#health{left:12px}#cash{right:12px}#mission{top:65px;left:12px;color:#ffe477}
+#help{position:absolute;top:65px;right:12px;text-align:right;font-size:11px;color:#d6e9f7;line-height:1.6}
+#message{position:absolute;top:42%;width:100%;text-align:center;color:#fff;font-size:20px;font-weight:bold;text-shadow:0 2px 8px black}
+#controls{position:fixed;bottom:18px;left:0;right:0;display:none;justify-content:space-between;padding:0 16px;pointer-events:none}
+.pad{display:flex;gap:8px;align-items:end}
+.ctrl{pointer-events:auto;width:58px;height:58px;border-radius:50%;background:#071c2cbb;color:white;border:1px solid #47dfff;font-size:20px;touch-action:none}
+.ctrl.wide{width:70px;height:55px;border-radius:14px;font-size:12px}
+#restart{position:absolute;bottom:15px;left:50%;transform:translateX(-50%);pointer-events:auto;display:none}
+@media(min-width:800px){#controls{display:none!important}}
+</style>
+</head>
+<body>
+<div id="menu">
+ <div class="panel">
+  <h1>SHUBHAM<br>GANGSTER CITY 3D</h1>
+  <p>Explore the city, collect cash, escape the police and complete missions!</p>
+  <p><b>PC:</b> WASD / Arrow keys · SHIFT Nitro · E Enter/Exit car</p>
+  <p><b>Mobile:</b> Use the on-screen controls</p>
+  <button id="start">START GAME</button>
+ </div>
+</div>
+<div id="hud">
+ <div class="stat" id="health">❤️ HEALTH: 100</div>
+ <div class="stat" id="cash">💰 CASH: $0</div>
+ <div class="stat" id="mission">MISSION: Collect 5 cash bags</div>
+ <div id="help">WASD: Move / Drive<br>SHIFT: Nitro · E: Enter/Exit<br>SPACE: Brake</div>
+ <div id="message"></div>
+ <button id="restart">PLAY AGAIN</button>
+</div>
+<div id="controls">
+ <div class="pad">
+  <button class="ctrl" data-key="ArrowLeft">◀</button>
+  <button class="ctrl" data-key="ArrowRight">▶</button>
+ </div>
+ <div class="pad">
+  <button class="ctrl wide" data-key="Shift">NITRO</button>
+  <button class="ctrl wide" data-key="e">ENTER</button>
+  <button class="ctrl" data-key="ArrowUp">▲</button>
+  <button class="ctrl" data-key="ArrowDown">▼</button>
+ </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+let scene,camera,renderer,clock;
+let car,player,police=[],cashBags=[];
+let keys={},started=false,inCar=true,health=100,cash=0;
+let speed=0,wanted=0,gameOver=false,audioCtx;
+const ui=id=>document.getElementById(id);
+
+function sound(freq=180,duration=.12,type="square",volume=.04){
+ try{
+  audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();
+  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+  o.type=type;o.frequency.value=freq;g.gain.value=volume;
+  o.connect(g);g.connect(audioCtx.destination);
+  o.start();g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);
+  o.stop(audioCtx.currentTime+duration);
+ }catch(e){}
+}
+function box(w,h,d,color,x,y,z){
+ const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshStandardMaterial({color,roughness:.8}));
+ m.position.set(x,y,z);scene.add(m);return m;
+}
+function makeCar(color,x,z){
+ const g=new THREE.Group();
+ const body=new THREE.Mesh(new THREE.BoxGeometry(2,0.7,4),new THREE.MeshStandardMaterial({color,metalness:.3,roughness:.4}));
+ body.position.y=.65;g.add(body);
+ const top=new THREE.Mesh(new THREE.BoxGeometry(1.55,.7,1.8),new THREE.MeshStandardMaterial({color:0x182c3e,metalness:.2,roughness:.3}));
+ top.position.set(0,1.25,-.25);g.add(top);
+ for(let sx of [-1,1])for(let sz of [-1.3,1.3]){
+  const wheel=new THREE.Mesh(new THREE.CylinderGeometry(.42,.42,.28,16),new THREE.MeshStandardMaterial({color:0x101010}));
+  wheel.rotation.z=Math.PI/2;wheel.position.set(sx, .42, sz);g.add(wheel);
+ }
+ g.position.set(x,0,z);scene.add(g);return g;
+}
+function makePerson(){
+ const g=new THREE.Group();
+ const body=new THREE.Mesh(new THREE.CylinderGeometry(.35,.4,1.1,10),new THREE.MeshStandardMaterial({color:0x16a5c7}));
+ body.position.y=.85;g.add(body);
+ const head=new THREE.Mesh(new THREE.SphereGeometry(.28,12,12),new THREE.MeshStandardMaterial({color:0xc98c65}));
+ head.position.y=1.55;g.add(head);scene.add(g);return g;
+}
+function buildCity(){
+ scene=new THREE.Scene();scene.background=new THREE.Color(0x91b8d0);scene.fog=new THREE.Fog(0x91b8d0,55,180);
+ camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,400);
+ renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(innerWidth,innerHeight);
+ renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));document.body.appendChild(renderer.domElement);
+ scene.add(new THREE.HemisphereLight(0xc9eaff,0x34402d,2));
+ const sun=new THREE.DirectionalLight(0xffffff,2);sun.position.set(30,60,20);scene.add(sun);
+ const ground=new THREE.Mesh(new THREE.PlaneGeometry(220,220),new THREE.MeshStandardMaterial({color:0x43554a}));
+ ground.rotation.x=-Math.PI/2;ground.position.y=-.08;scene.add(ground);
+ // City roads
+ for(let i=-4;i<=4;i++){
+  box(9,.04,210,0x252a31,i*22,.01,0);
+  box(210,.04,9,0x252a31,0,.015,i*22);
+  for(let j=-9;j<=9;j++){
+   box(.18,.045,2.2,0xe5dba4,i*22,.04,j*11);
+   box(2.2,.045,.18,0xe5dba4,j*11,.04,i*22);
+  }
+ }
+ // Buildings
+ const colors=[0x667788,0x9b8775,0x526b7c,0x817c91,0x9b9a83,0x485d70];
+ for(let x=-4;x<=4;x++)for(let z=-4;z<=4;z++){
+  if(Math.abs(x)%1===0&&Math.abs(z)%1===0){
+   const bx=x*22+(Math.random()-.5)*5,bz=z*22+(Math.random()-.5)*5;
+   if(Math.abs(bx)<12&&Math.abs(bz)<12)continue;
+   const w=7+Math.random()*5,d=7+Math.random()*5,h=8+Math.random()*24;
+   box(w,h,d,colors[Math.floor(Math.random()*colors.length)],bx,h/2,bz);
+   for(let yy=2;yy<h-1;yy+=3){
+    for(let sx of [-1,1])box(.12,.8,.12,0xffd77a,bx+sx*(w/2+.01),yy,bz);
+   }
+  }
+ }
+ // Street lights
+ for(let i=-4;i<=4;i++)for(let z=-4;z<=4;z++){
+  let x=i*22+6,zz=z*22+6;
+  box(.16,4,.16,0x30343b,x,2,zz);
+  box(.8,.12,.35,0xffe7a1,x,4,zz);
+ }
+}
+function addCash(){
+ cashBags=[];
+ for(let i=0;i<12;i++){
+  const a=new THREE.Mesh(new THREE.BoxGeometry(.7,.5,.7),new THREE.MeshStandardMaterial({color:0xffd52a,emissive:0x553800}));
+  a.position.set((Math.random()-.5)*150,.45,(Math.random()-.5)*150);
+  scene.add(a);cashBags.push(a);
+ }
+}
+function addPolice(){
+ police=[];
+ for(let i=0;i<2;i++){
+  const p=makeCar(0xeeeeee,Math.random()*30-15,Math.random()*30-15);
+  box(.8,.18,.12,0x1555ff,p.position.x,1.55,p.position.z);
+  police.push(p);
+ }
+}
+function startGame(){
+ if(started)return;
+ started=true;health=100;cash=0;wanted=0;speed=0;gameOver=false;inCar=true;
+ ui("menu").style.display="none";ui("hud").style.display="block";
+ if(innerWidth<800)ui("controls").style.display="flex";
+ try{
+  buildCity();car=makeCar(0xff303d,0,0);player=makePerson();player.visible=false;
+  addCash();addPolice();clock=new THREE.Clock();
+  camera.position.set(0,8,12);camera.lookAt(0,0,0);
+  animate();
+ }catch(e){ui("message").textContent="Game error: "+e.message;}
+}
+function endGame(){
+ gameOver=true;speed=0;ui("message").textContent="🚨 BUSTED! GAME OVER";
+ ui("restart").style.display="block";sound(90,.5,"sawtooth");
+}
+function updateHUD(){
+ ui("health").textContent="❤️ HEALTH: "+Math.max(0,Math.floor(health));
+ ui("cash").textContent="💰 CASH: $"+cash;
+ ui("mission").textContent=cash>=500?"MISSION COMPLETE!": "MISSION: Collect 5 cash bags ($"+cash+"/$500)";
+}
+function animate(){
+ if(!started||gameOver)return;
+ requestAnimationFrame(animate);
+ const dt=Math.min(clock.getDelta(),.04);
+ const forward=new THREE.Vector3(Math.sin(car.rotation.y),0,Math.cos(car.rotation.y));
+ if(inCar){
+  if(keys.ArrowUp||keys.w)speed+=18*dt;
+  if(keys.ArrowDown||keys.s)speed-=15*dt;
+  if(keys.Shift)speed+=24*dt;
+  if(keys[" "])speed*=.91;
+  speed*=.985;speed=THREE.MathUtils.clamp(speed,-12,keys.Shift?38:24);
+  if(Math.abs(speed)>.4){
+   const steer=(keys.ArrowLeft||keys.a?1:0)-(keys.ArrowRight||keys.d?1:0);
+   car.rotation.y+=steer*dt*(speed>=0?1:-1)*1.8;
+  }
+  car.position.addScaledVector(forward,speed*dt);
+ }else{
+  const move=(keys.ArrowUp||keys.w?1:0)-(keys.ArrowDown||keys.s?1:0);
+  const turn=(keys.ArrowLeft||keys.a?1:0)-(keys.ArrowRight||keys.d?1:0);
+  player.rotation.y+=turn*dt*2;
+  player.position.addScaledVector(new THREE.Vector3(Math.sin(player.rotation.y),0,Math.cos(player.rotation.y)),move*dt*8);
+ }
+ const target=inCar?car:player;
+ target.position.x=THREE.MathUtils.clamp(target.position.x,-100,100);
+ target.position.z=THREE.MathUtils.clamp(target.position.z,-100,100);
+ // Camera follows player/car
+ const behind=new THREE.Vector3(Math.sin(target.rotation.y)*-9,5,Math.cos(target.rotation.y)*-9);
+ const desired=target.position.clone().add(behind);
+ camera.position.lerp(desired,.09);camera.lookAt(target.position.x,target.position.y+1,target.position.z);
+ // Cash collection
+ for(let i=cashBags.length-1;i>=0;i--){
+  const b=cashBags[i];b.rotation.y+=dt*2;
+  if(b.position.distanceTo(target.position)<2.5){
+   scene.remove(b);cashBags.splice(i,1);cash+=100;wanted=Math.min(5,wanted+1);
+   sound(720,.12,"sine");updateHUD();
+  }
+ }
+ // Police chase
+ police.forEach(p=>{
+  const dx=target.position.x-p.position.x,dz=target.position.z-p.position.z;
+  const dist=Math.hypot(dx,dz);
+  if(wanted>0){
+   p.rotation.y=Math.atan2(dx,dz);
+   p.position.x+=(dx/(dist||1))*dt*(5+wanted);
+   p.position.z+=(dz/(dist||1))*dt*(5+wanted);
+   if(dist<3.2){health-=dt*(5+wanted*2);speed*=.97;}
+  }
+ });
+ if(health<=0){health=0;updateHUD();endGame();}
+ if(cash>=500){ui("message").textContent="🏆 MISSION COMPLETE! YOU ARE THE CITY KING!";wanted=0;}
+ updateHUD();
+ renderer.render(scene,camera);
+}
+function toggleCar(){
+ if(!started||gameOver)return;
+ if(inCar){
+  player.position.copy(car.position);player.position.x+=2.5;player.rotation.y=car.rotation.y;
+  player.visible=true;car.visible=true;inCar=false;speed=0;
+ }else{
+  if(player.position.distanceTo(car.position)<5){player.visible=false;inCar=true;}
+ }
+ sound(300,.1,"sine");
+}
+document.addEventListener("keydown",e=>{
+ keys[e.key]=true;keys[e.key.toLowerCase()]=true;
+ if(e.key.toLowerCase()==="e")toggleCar();
+});
+document.addEventListener("keyup",e=>{keys[e.key]=false;keys[e.key.toLowerCase()]=false;});
+document.querySelectorAll(".ctrl").forEach(btn=>{
+ const k=btn.dataset.key;
+ const down=e=>{e.preventDefault();keys[k]=true;keys[k.toLowerCase()]=true;if(k==="e")toggleCar();};
+ const up=e=>{e.preventDefault();keys[k]=false;keys[k.toLowerCase()]=false;};
+ btn.addEventListener("pointerdown",down);btn.addEventListener("pointerup",up);
+ btn.addEventListener("pointerleave",up);btn.addEventListener("pointercancel",up);
+});
+ui("start").addEventListener("click",startGame);
+ui("restart").addEventListener("click",()=>location.reload());
+addEventListener("resize",()=>{
+ if(camera&&renderer){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);}
+});
+</script>
+</body>
+</html>
