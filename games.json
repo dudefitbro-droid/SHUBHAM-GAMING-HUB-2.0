@@ -20,5 +20,12 @@
     "image": "https://play-lh.googleusercontent.com/PdAphjLwx8Mus7pfil3ZC5hQQFKNZFJYmVElwi4RhUFNVxBLXAXa3CGBEXSzDaKDP_REEi2zK1cFoFBpVCIOvw",
     "category": "Racing",
     "url": "https://nitrorush-shubham.vercel.app/"
+  },
+  {
+    "id": "251111af-2277-4a51-9878-9a26d548681f",
+    "title": "SHUBHAM ZOMBIE HUNTER 3D",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRvw0tGvfNl1Lxg20MdN38KAbYsYpD5KSuzurVCwDCBeA&s=10",
+    "category": "Action",
+    "url": "/games/shubham-zombie-hunter-3d/index.html"
   }
 ]
