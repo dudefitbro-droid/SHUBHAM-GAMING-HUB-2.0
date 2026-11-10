@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -26,6 +27,7 @@ header{
 .logo span{color:#00e5ff}
 nav{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
 nav a{color:#ddd;text-decoration:none;font-size:14px}
+nav a:hover{color:#00e5ff}
 button{cursor:pointer;border:0;font-weight:bold}
 .hero{
  min-height:390px;padding:85px 7% 65px;
@@ -60,9 +62,13 @@ button{cursor:pointer;border:0;font-weight:bold}
  overflow:hidden;transition:.25s;
 }
 .game:hover{transform:translateY(-6px);border-color:#9b69ff}
-.game img{width:100%;height:155px;object-fit:cover;background:#201735}
+.game img{
+ width:100%;height:165px;object-fit:cover;background:#201735;
+ display:block;
+}
 .game-info{padding:17px}
 .game-info h3{font-size:19px;margin-bottom:8px}
+.game-info p{color:#aaa;font-size:13px;line-height:1.5;margin:10px 0}
 .category{color:#00d9ed;font-size:12px}
 .play{
  width:100%;padding:12px;margin-top:15px;
@@ -71,16 +77,12 @@ button{cursor:pointer;border:0;font-weight:bold}
 }
 .empty{color:#aaa;padding:30px;text-align:center;grid-column:1/-1}
 footer{text-align:center;padding:30px;color:#777;border-top:1px solid #ffffff15}
-
-/* OWNER BUTTON */
 .owner-button{
  position:fixed;bottom:20px;right:18px;z-index:100;
  padding:15px 20px;border-radius:12px;
  background:linear-gradient(120deg,#8b43ff,#00cbe9);
  color:white;box-shadow:0 0 25px #884cff88;
 }
-
-/* MODALS */
 .overlay{
  display:none;position:fixed;inset:0;z-index:200;
  background:#000c;backdrop-filter:blur(8px);
@@ -113,9 +115,7 @@ footer{text-align:center;padding:30px;color:#777;border-top:1px solid #ffffff15}
  border-radius:10px;display:flex;justify-content:space-between;
  gap:10px;align-items:center;flex-wrap:wrap;
 }
-.admin-game button{
- padding:9px 12px;border-radius:6px;margin:3px;
-}
+.admin-game button{padding:9px 12px;border-radius:6px;margin:3px}
 .edit{background:#6341bd;color:white}
 .delete{background:#c73550;color:white}
 .status{font-size:13px;color:#00e5a0;margin:10px 0}
@@ -151,7 +151,6 @@ footer{text-align:center;padding:30px;color:#777;border-top:1px solid #ffffff15}
 
 <section class="section" id="games">
  <h2>🎮 EXPLORE GAMES</h2>
-
  <div class="tools">
   <input id="search" placeholder="Search your game..." oninput="renderGames()">
   <select id="filter" onchange="renderGames()">
@@ -165,7 +164,6 @@ footer{text-align:center;padding:30px;color:#777;border-top:1px solid #ffffff15}
    <option>Other</option>
   </select>
  </div>
-
  <div class="games" id="gamesList">
   <div class="empty">Loading games...</div>
  </div>
@@ -181,7 +179,6 @@ footer{text-align:center;padding:30px;color:#777;border-top:1px solid #ffffff15}
 
 <footer>© 2026 SHUBHAM GAMING HUB | ALL RIGHTS RESERVED</footer>
 
-<!-- ALWAYS VISIBLE OWNER LOGIN -->
 <button class="owner-button" onclick="openLogin()">👑 OWNER LOGIN</button>
 
 <!-- LOGIN MODAL -->
@@ -206,6 +203,7 @@ footer{text-align:center;padding:30px;color:#777;border-top:1px solid #ffffff15}
   <h3 id="formTitle">➕ ADD NEW GAME</h3>
   <input id="gameTitle" placeholder="Game Name">
   <input id="gameImage" placeholder="Game Image URL">
+
   <select id="gameCategory">
    <option>Action</option>
    <option>Racing</option>
@@ -215,6 +213,7 @@ footer{text-align:center;padding:30px;color:#777;border-top:1px solid #ffffff15}
    <option>Puzzle</option>
    <option>Other</option>
   </select>
+
   <input id="gameUrl" placeholder="Playable Game URL">
 
   <button class="action" onclick="saveGame()">SAVE GAME</button>
@@ -232,18 +231,22 @@ let games=[];
 let adminPassword="";
 let editingId=null;
 
-const API = "/api/games";
+const API="/api/games";
 
 async function loadGames(){
  try{
   const res=await fetch(API,{cache:"no-store"});
-  if(!res.ok) throw new Error("API error");
-  games=await res.json();
-  if(!Array.isArray(games)) games=[];
+  if(!res.ok) throw new Error("API error: "+res.status);
+
+  const data=await res.json();
+  if(!Array.isArray(data)) throw new Error("Invalid games response");
+
+  games=data;
   renderGames();
  }catch(e){
+  console.error("LOAD GAMES ERROR:",e);
   document.getElementById("gamesList").innerHTML=
-  '<div class="empty">Games could not load. Check API setup.</div>';
+   '<div class="empty">Games could not load. Check API setup.</div>';
  }
 }
 
@@ -265,11 +268,12 @@ function renderGames(){
  list.innerHTML=filtered.map(g=>`
   <div class="game">
    <img src="${safe(g.image)}" alt="${safe(g.title)}"
-   onerror="this.src='https://placehold.co/600x350/171027/ffffff?text=GAME'">
+    onerror="this.src='https://placehold.co/600x350/171027/ffffff?text=GAME'">
    <div class="game-info">
     <h3>${safe(g.title)}</h3>
-    <span class="category">${safe(g.category)}</span>
-    <button class="play" onclick="playGame('${encodeURIComponent(g.url||"")}')">
+    <span class="category">${safe(g.category||"Other")}</span>
+    <p>${safe(g.description||"Enjoy this exciting game on Shubham Gaming Hub.")}</p>
+    <button class="play" onclick="playGame('${safe(encodeURIComponent(g.url||""))}')">
      ▶ PLAY NOW
     </button>
    </div>
@@ -283,13 +287,21 @@ function safe(value){
  }[c]));
 }
 
-function playGame(url){
- const target=decodeURIComponent(url);
+/* FIXED GAME URL SUPPORT */
+function playGame(encodedUrl){
  try{
-  const parsed=new URL(target);
-  if(!["http:","https:"].includes(parsed.protocol)) throw new Error();
-  window.open(parsed.href,"_blank","noopener");
- }catch(e){alert("Invalid game URL");}
+  const raw=decodeURIComponent(encodedUrl);
+  const target=new URL(raw,window.location.origin);
+
+  if(!["http:","https:"].includes(target.protocol)){
+   throw new Error("Invalid protocol");
+  }
+
+  window.open(target.href,"_blank","noopener");
+ }catch(e){
+  console.error(e);
+  alert("Invalid game URL!");
+ }
 }
 
 function openLogin(){
@@ -303,7 +315,11 @@ function closeModal(id){
 async function login(){
  const password=document.getElementById("adminPassword").value;
  const status=document.getElementById("loginStatus");
- if(!password){status.textContent="Enter password first.";return;}
+
+ if(!password){
+  status.textContent="Enter password first.";
+  return;
+ }
 
  status.textContent="Verifying...";
 
@@ -318,16 +334,21 @@ async function login(){
   });
 
   const data=await res.json();
-  if(!res.ok||!data.success) throw new Error("Wrong password");
+  if(!res.ok||!data.success){
+   throw new Error(data.error||"Wrong password");
+  }
 
   adminPassword=password;
   document.getElementById("adminPassword").value="";
   closeModal("loginOverlay");
   document.getElementById("adminOverlay").style.display="flex";
+
+  await loadGames();
   renderAdminGames();
   status.textContent="";
+
  }catch(e){
-  status.textContent="❌ Login failed. Check password or API.";
+  status.textContent="❌ Login failed: "+e.message;
  }
 }
 
@@ -343,12 +364,14 @@ function resetForm(){
  document.getElementById("gameTitle").value="";
  document.getElementById("gameImage").value="";
  document.getElementById("gameUrl").value="";
+ document.getElementById("gameCategory").value="Action";
  document.getElementById("formTitle").textContent="➕ ADD NEW GAME";
  document.getElementById("adminStatus").textContent="";
 }
 
 function renderAdminGames(){
  const box=document.getElementById("adminGames");
+
  if(!games.length){
   box.innerHTML='<p style="color:#aaa">No games added yet.</p>';
   return;
@@ -358,25 +381,26 @@ function renderAdminGames(){
   <div class="admin-game">
    <strong>${safe(g.title)}</strong>
    <div>
-    <button class="edit" onclick="editGame('${safe(g.id)}')">EDIT</button>
-    <button class="delete" onclick="deleteGame('${safe(g.id)}')">DELETE</button>
+    <button class="edit" onclick="editGame('${encodeURIComponent(String(g.id))}')">EDIT</button>
+    <button class="delete" onclick="deleteGame('${encodeURIComponent(String(g.id))}')">DELETE</button>
    </div>
   </div>
  `).join("");
 }
 
-function editGame(id){
- const game=games.find(g=>String(g.id)===String(id));
+function editGame(encodedId){
+ const id=decodeURIComponent(encodedId);
+ const game=games.find(g=>String(g.id)===id);
  if(!game)return;
 
  editingId=game.id;
- document.getElementById("gameTitle").value=game.title;
- document.getElementById("gameImage").value=game.image;
- document.getElementById("gameCategory").value=game.category;
- document.getElementById("gameUrl").value=game.url;
+ document.getElementById("gameTitle").value=game.title||"";
+ document.getElementById("gameImage").value=game.image||"";
+ document.getElementById("gameCategory").value=game.category||"Other";
+ document.getElementById("gameUrl").value=game.url||"";
  document.getElementById("formTitle").textContent="✏️ EDIT GAME";
  document.getElementById("adminStatus").textContent="Editing: "+game.title;
- window.scrollTo(0,0);
+ document.getElementById("gameTitle").scrollIntoView({behavior:"smooth",block:"center"});
 }
 
 async function saveGame(){
@@ -392,9 +416,13 @@ async function saveGame(){
  }
 
  try{
-  new URL(image);
-  const parsed=new URL(url);
-  if(!["http:","https:"].includes(parsed.protocol))throw new Error();
+  const parsedImage=new URL(image);
+  const parsedGame=new URL(url,window.location.origin);
+
+  if(!["http:","https:"].includes(parsedImage.protocol)||
+     !["http:","https:"].includes(parsedGame.protocol)){
+   throw new Error();
+  }
  }catch(e){
   status.textContent="Enter valid image and game URLs.";
   return;
@@ -404,7 +432,10 @@ async function saveGame(){
 
  try{
   const action=editingId?"update":"add";
-  const body={action,game:{id:editingId,title,image,category,url}};
+  const body={
+   action,
+   game:{id:editingId,title,image,category,url}
+  };
 
   const res=await fetch(API,{
    method:"POST",
@@ -416,24 +447,30 @@ async function saveGame(){
   });
 
   const data=await res.json();
-  if(!res.ok)throw new Error(
- (data.error||"Save failed")+
- " | HTTP: "+res.status+
- " | GitHub: "+(data.githubStatus??"N/A")+
- " | Repo: "+(data.repo??"N/A")
-);
+
+  if(!res.ok){
+   throw new Error(
+    (data.error||"Save failed")+
+    " | HTTP: "+res.status+
+    " | GitHub: "+(data.githubStatus??"N/A")+
+    " | Repo: "+(data.repo??"N/A")
+   );
+  }
 
   games=data.games;
   renderGames();
   renderAdminGames();
   resetForm();
   status.textContent="✅ Game saved permanently!";
+
  }catch(e){
   status.textContent="❌ "+e.message;
  }
 }
 
-async function deleteGame(id){
+async function deleteGame(encodedId){
+ const id=decodeURIComponent(encodedId);
+
  if(!confirm("Are you sure you want to delete this game?"))return;
 
  const status=document.getElementById("adminStatus");
@@ -457,11 +494,13 @@ async function deleteGame(id){
   renderAdminGames();
   resetForm();
   status.textContent="✅ Game deleted permanently!";
+
  }catch(e){
   status.textContent="❌ "+e.message;
  }
 }
 
+/* INITIAL LOAD */
 loadGames();
 </script>
 </body>
