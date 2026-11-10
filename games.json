@@ -13,5 +13,12 @@
     "image": "https://freewebgames.io/data/image/game/flappy-bird.jpg",
     "category": "Arcade",
     "url": "https://flappybird.io/"
+  },
+  {
+    "id": "b2cbd918-5cd9-48a6-ae81-28da3bdf06d0",
+    "title": "Nitro Rush 3D",
+    "image": "https://fly.silvergames.com/thumbnail/screenshots/real-drift-car-racing/2_car-drifting-gameplay.jpg",
+    "category": "Racing",
+    "url": "https://nitrorush-shubham.vercel.app/"
   }
 ]
