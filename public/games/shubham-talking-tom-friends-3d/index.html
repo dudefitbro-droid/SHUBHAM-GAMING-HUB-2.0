@@ -4,703 +4,458 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>SHUBHAM TALKING TOM FRIENDS 3D V2.3</title>
+<meta name="theme-color" content="#100b25">
+<title>SHUBHAM TALKING TOM FRIENDS 3D V3.0</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#11162c;color:white;font-family:Arial;overflow:hidden}
-header{height:55px;background:#171e3d;display:flex;align-items:center;justify-content:space-between;padding:0 12px}
-header h2{font-size:14px;color:#ffad43}
-header span{font-size:11px;color:#b8c8ff}
-#stage{height:40vh;min-height:240px;position:relative}
-#stage canvas{display:block;width:100%;height:100%}
-#speech{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:white;color:#222;padding:9px 14px;border-radius:20px;font-size:13px;font-weight:bold;white-space:nowrap;max-width:90%;overflow:hidden;text-overflow:ellipsis}
-#topInfo{position:absolute;bottom:8px;left:10px;font-size:12px;background:#151b35cc;padding:8px 12px;border-radius:12px}
-#score{position:absolute;right:10px;bottom:8px;background:#171e3d;padding:8px 12px;border-radius:12px;font-size:12px}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:7px;background:#171e3d}
-.stat{background:#273253;border-radius:10px;padding:7px;text-align:center;font-size:11px}
-.bar{height:7px;background:#485474;border-radius:20px;margin-top:6px;overflow:hidden}
-.fill{height:100%;width:75%;background:#52e69c;transition:.3s}
-.panel{background:#11172e;padding:7px}
-.panelTitle{font-size:10px;color:#9fb4e8;margin:0 0 6px 3px}
-.friends,.controls{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
-button{border:0;border-radius:10px;background:#ff9b31;color:#24152b;font-weight:bold;padding:10px 2px;font-size:11px;cursor:pointer}
-button:active{transform:scale(.94)}
-.friend{background:#293456;color:white;border:1px solid #53648e}
-.friend.active{background:#ff9b31;color:#24152b;border:2px solid white}
-.controls{grid-template-columns:repeat(4,1fr)}
-.controls button{background:#34446d;color:white}
-.controls button.primary{background:#ff9b31;color:#25152a}
-.talk{display:flex;gap:6px;padding:7px;background:#11172e}
-input{flex:1;min-width:0;background:#263252;color:white;border:1px solid #53648e;border-radius:10px;padding:10px}
-.talk button{padding:10px}
-@media(min-width:700px){
-#stage{height:45vh}
-.stats{padding-left:20%;padding-right:20%}
-.friends{padding-left:12%;padding-right:12%}
-.controls{padding-left:15%;padding-right:15%}
-.talk{padding-left:20%;padding-right:20%}
+body{font-family:Arial,sans-serif;background:#100b25;color:white;overflow:hidden}
+#game{position:fixed;inset:0}
+canvas{display:block}
+.top{
+ position:fixed;top:10px;left:10px;right:10px;z-index:5;
+ display:flex;justify-content:space-between;align-items:center;gap:8px;
+ pointer-events:none
+}
+.logo,.coins,.panel{
+ background:#17112de8;border:1px solid #ffffff24;
+ border-radius:14px;padding:10px 13px;backdrop-filter:blur(10px)
+}
+.logo{font-size:14px;font-weight:900;color:#ffd76a}
+.coins{font-weight:bold;color:#ffe16b}
+.panel{
+ position:fixed;z-index:5;background:#17112de8;
+ border:1px solid #ffffff25;border-radius:16px;padding:12px;
+ backdrop-filter:blur(10px)
+}
+.left{left:10px;top:68px;width:145px}
+.right{right:10px;top:68px;width:145px}
+.panel h3{font-size:12px;color:#ffd76a;margin-bottom:9px}
+button{
+ border:0;border-radius:10px;padding:10px 8px;
+ background:#33245b;color:white;font-weight:bold;
+ cursor:pointer;font-size:12px;touch-action:manipulation
+}
+button:active{transform:scale(.95)}
+button.active{background:#ffb52e;color:#24152d}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.roomgrid{display:grid;grid-template-columns:1fr;gap:6px}
+.bottom{
+ position:fixed;z-index:6;bottom:12px;left:50%;
+ transform:translateX(-50%);width:min(600px,96%);
+ display:flex;flex-wrap:wrap;justify-content:center;gap:7px
+}
+.bottom button{min-width:66px;padding:12px 9px;background:#21163fdd;border:1px solid #ffffff25}
+.bottom button.action{background:#e99b27;color:#24152d}
+.move{
+ position:fixed;z-index:6;bottom:90px;left:15px;
+ display:grid;grid-template-columns:48px 48px 48px;gap:5px
+}
+.move button{height:43px;font-size:18px;background:#21163fdd}
+.move .empty{visibility:hidden}
+.hint{
+ position:fixed;z-index:4;bottom:75px;right:12px;
+ font-size:11px;color:#fff9;background:#17112dbb;
+ padding:8px 10px;border-radius:10px
+}
+#message{
+ position:fixed;z-index:8;top:48%;left:50%;transform:translate(-50%,-50%);
+ background:#17112df2;border:1px solid #ffd76a;border-radius:18px;
+ padding:14px 22px;font-size:18px;font-weight:bold;
+ display:none;text-align:center;white-space:nowrap
+}
+@media(max-width:600px){
+ .left{top:65px;width:116px;padding:8px}
+ .right{top:65px;width:116px;padding:8px}
+ .panel h3{font-size:11px}
+ button{font-size:10px;padding:9px 5px}
+ .logo{font-size:11px;padding:9px}
+ .coins{font-size:11px;padding:9px}
+ .bottom{bottom:8px;gap:5px}
+ .bottom button{min-width:57px;padding:10px 6px}
+ .move{bottom:100px;left:8px;grid-template-columns:42px 42px 42px}
+ .move button{height:39px}
+ .hint{bottom:105px;right:8px;max-width:125px;line-height:1.4}
 }
 </style>
 </head>
 <body>
+<div id="game"></div>
 
-<header>
-<h2>🐱 SHUBHAM TOM FRIENDS 3D</h2>
-<span>VERSION 2.3</span>
-</header>
-
-<div id="stage">
-<div id="speech">Hello! I am Tom! 😺</div>
-<div id="topInfo">🏠 Living Room</div>
-<div id="score">⭐ Score: 0</div>
+<div class="top">
+ <div class="logo">😺 SHUBHAM TALKING TOM FRIENDS 3D V3.0</div>
+ <div class="coins">⭐ <span id="coins">0</span></div>
 </div>
 
-<div class="stats">
-<div class="stat">❤️ Happiness<div class="bar"><div class="fill" id="happy"></div></div></div>
-<div class="stat">🍕 Hunger<div class="bar"><div class="fill" id="hunger"></div></div></div>
-<div class="stat">⚡ Energy<div class="bar"><div class="fill" id="energy"></div></div></div>
+<div class="panel left">
+ <h3>🐾 FRIENDS</h3>
+ <div class="grid" id="friends">
+  <button class="active" data-friend="0">😺 Tom</button>
+  <button data-friend="1">🐱 Mimi</button>
+  <button data-friend="2">🐶 Bruno</button>
+  <button data-friend="3">🐼 Coco</button>
+  <button data-friend="4">🐻 Max</button>
+ </div>
 </div>
 
-<div class="panel">
-<div class="panelTitle">CHOOSE YOUR FRIEND</div>
-<div class="friends">
-<button class="friend active" onclick="chooseFriend(0)">🐱 Tom</button>
-<button class="friend" onclick="chooseFriend(1)">🐰 Mimi</button>
-<button class="friend" onclick="chooseFriend(2)">🐻 Bruno</button>
-<button class="friend" onclick="chooseFriend(3)">🐼 Coco</button>
-<button class="friend" onclick="chooseFriend(4)">🦊 Max</button>
-</div>
-</div>
-
-<div class="panel">
-<div class="panelTitle">MOVE & PLAY</div>
-<div class="controls">
-<button onclick="move(-1)">⬅ LEFT</button>
-<button onclick="move(1)">RIGHT ➡</button>
-<button onclick="jump()">⬆ JUMP</button>
-<button onclick="run()">🏃 RUN</button>
-<button class="primary" onclick="feed()">🍕 FEED</button>
-<button class="primary" onclick="bath()">🛁 BATH</button>
-<button class="primary" onclick="sleep()">😴 SLEEP</button>
-<button class="primary" onclick="dance()">💃 DANCE</button>
-<button onclick="changeRoom()">🏠 ROOM</button>
-<button onclick="startStars()">⭐ STARS</button>
-<button onclick="talk()">🔊 TALK</button>
-<button onclick="listen()">🎤 MIC</button>
-</div>
+<div class="panel right">
+ <h3>🏠 ROOMS</h3>
+ <div class="roomgrid">
+  <button class="active" data-room="0">🛋 Living Room</button>
+  <button data-room="1">🛏 Bedroom</button>
+  <button data-room="2">🛁 Bathroom</button>
+  <button data-room="3">🍎 Kitchen</button>
+  <button data-room="4">🎮 Play Room</button>
+ </div>
 </div>
 
-<div class="talk">
-<input id="words" placeholder="Talk to your friend...">
-<button onclick="talk()">SEND</button>
+<div class="move">
+ <button class="empty">.</button><button data-move="forward">⬆️</button><button class="empty">.</button>
+ <button data-move="left">⬅️</button><button data-move="back">⬇️</button><button data-move="right">➡️</button>
 </div>
+
+<div class="hint">Move with arrows or keyboard<br>Collect ⭐ stars!</div>
+
+<div class="bottom">
+ <button class="action" id="feed">🍎 Feed</button>
+ <button class="action" id="bath">🛁 Bath</button>
+ <button class="action" id="sleep">😴 Sleep</button>
+ <button class="action" id="dance">💃 Dance</button>
+ <button id="jump">🦘 Jump</button>
+ <button id="talk">🗣 Talk</button>
+ <button id="collect">⭐ Collect</button>
+</div>
+
+<div id="message"></div>
 
 <script type="module">
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
 
-const stage=document.getElementById('stage');
+const mount=document.getElementById("game");
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(0x9bdcff);
+scene.fog=new THREE.Fog(0x9bdcff,15,35);
 
-const camera=new THREE.PerspectiveCamera(42,1,.1,100);
-camera.position.set(0,3.1,9);
-camera.lookAt(0,1.55,0);
+const camera=new THREE.PerspectiveCamera(48,innerWidth/innerHeight,.1,100);
+camera.position.set(0,4.2,9);
+camera.lookAt(0,1.3,0);
 
 const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth,innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 renderer.shadowMap.enabled=true;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-stage.appendChild(renderer.domElement);
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+mount.appendChild(renderer.domElement);
 
-scene.add(new THREE.HemisphereLight(0xffffff,0x7580a0,2));
-
-const sun=new THREE.DirectionalLight(0xffffff,2.5);
-sun.position.set(4,8,6);
+scene.add(new THREE.HemisphereLight(0xffffff,0x69708c,2));
+const sun=new THREE.DirectionalLight(0xffffff,2.2);
+sun.position.set(-4,9,6);
 sun.castShadow=true;
+sun.shadow.mapSize.set(1024,1024);
 scene.add(sun);
 
-const mat=c=>new THREE.MeshStandardMaterial({color:c,roughness:.7});
-const white=mat(0xffffff);
-const black=mat(0x20202b);
-const pink=mat(0xff83a8);
-const cream=mat(0xffe0b5);
-
-function ball(p,x,y,z,sx,sy,sz,m){
- const o=new THREE.Mesh(new THREE.SphereGeometry(1,32,24),m);
- o.position.set(x,y,z);
- o.scale.set(sx,sy,sz);
- o.castShadow=true;
- p.add(o);
- return o;
-}
-
-function capsule(p,x,y,z,r,l,m){
- const o=new THREE.Mesh(new THREE.CapsuleGeometry(r,l,5,12),m);
- o.position.set(x,y,z);
- o.castShadow=true;
- p.add(o);
- return o;
-}
-
-// ROOM
-const floor=new THREE.Mesh(
- new THREE.PlaneGeometry(18,18),
- mat(0x69c98c)
-);
+const mat=(color,roughness=.8)=>new THREE.MeshStandardMaterial({color,roughness});
+const floorMat=mat(0xe9c9a0);
+const wallMat=mat(0x9b8ce8);
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(30,30),floorMat);
 floor.rotation.x=-Math.PI/2;
 floor.receiveShadow=true;
 scene.add(floor);
 
-const wall=new THREE.Mesh(
- new THREE.BoxGeometry(15,8,.25),
- mat(0xf1d9ff)
-);
-wall.position.set(0,3.5,-3.5);
-scene.add(wall);
+const backWall=new THREE.Mesh(new THREE.BoxGeometry(16,7,.25),wallMat);
+backWall.position.set(0,3.5,-5);
+backWall.receiveShadow=true;
+scene.add(backWall);
 
-function furniture(x,y,z,sx,sy,sz,c){
- const o=new THREE.Mesh(
-  new THREE.BoxGeometry(sx,sy,sz),
-  mat(c)
- );
- o.position.set(x,y,z);
- o.castShadow=true;
- scene.add(o);
+const sideWall=new THREE.Mesh(new THREE.BoxGeometry(.25,7,10),mat(0xb9a8f2));
+sideWall.position.set(-8,3.5,0);
+scene.add(sideWall);
+
+const roomObjects=new THREE.Group();
+scene.add(roomObjects);
+
+function box(parent,w,h,d,color,x,y,z){
+ const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(color));
+ m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;
+ parent.add(m);return m;
+}
+function sphere(parent,r,color,x,y,z,sx=1,sy=1,sz=1){
+ const m=new THREE.Mesh(new THREE.SphereGeometry(r,24,18),mat(color));
+ m.position.set(x,y,z);m.scale.set(sx,sy,sz);
+ m.castShadow=true;m.receiveShadow=true;parent.add(m);return m;
 }
 
-furniture(-2,.45,-.7,2.2,.9,1.1,0x9b633f);
-furniture(2,.3,-1.4,1.5,.6,.8,0x5599dd);
-furniture(0,2.1,-3.1,2.1,.12,.2,0xffc95c);
+function buildRoom(index){
+ while(roomObjects.children.length)roomObjects.remove(roomObjects.children[0]);
+ const settings=[
+  [0xe9c9a0,0x9b8ce8,0xffd7a5],
+  [0x8b9ed0,0x546aab,0xa8c7ff],
+  [0xb6e6ed,0x5dabb9,0x8fe7ee],
+  [0xf3d49a,0xd98b5b,0xffe0a0],
+  [0x7b6bc7,0x30235e,0xa78bfa]
+ ];
+ floorMat.color.setHex(settings[index][0]);
+ wallMat.color.setHex(settings[index][1]);
+ backWall.material.color.setHex(settings[index][1]);
+ sideWall.material.color.setHex(settings[index][2]);
+
+ if(index===0){
+  box(roomObjects,3,.65,.9,0x9b5939,0,0.35,-2.7);
+  box(roomObjects,3,.3,.9,0xf1b47b,0,.82,-2.7);
+  box(roomObjects,.5,1.5,.5,0x7b442f,-2,0.75,-2.7);
+  box(roomObjects,.5,1.5,.5,0x7b442f,2,0.75,-2.7);
+ }else if(index===1){
+  box(roomObjects,3,.5,2,0x6c4b8c,0,.35,-2.7);
+  box(roomObjects,3,.18,2,0xe8b8e9,0,.68,-2.7);
+  box(roomObjects,3,.9,.25,0x704a9d,0,1,-3.6);
+  sphere(roomObjects,.35,0xffdf76,2,1.1,-3);
+ }else if(index===2){
+  box(roomObjects,2,.7,1.2,0x75dce7,-2,.35,-2.7);
+  box(roomObjects,2,.12,1.2,0xd7fbff,-2,.75,-2.7);
+  sphere(roomObjects,.4,0x5cc7d4,2,.4,-2.7,1,1,.7);
+ }else if(index===3){
+  box(roomObjects,4,1,1,0x9b5c37,0,.5,-3);
+  box(roomObjects,4,.15,1,0xf4d6a3,0,1.05,-3);
+  box(roomObjects,.7,1.7,.7,0x6c9c68,-2.3,.85,-3);
+  box(roomObjects,.7,1.7,.7,0x6c9c68,2.3,.85,-3);
+ }else{
+  box(roomObjects,2,.3,1,0x7545c4,-2,.2,-2.8);
+  box(roomObjects,2,.3,1,0x7545c4,2,.2,-2.8);
+  sphere(roomObjects,.45,0xffd44e,0,1.1,-3);
+  box(roomObjects,2,.15,.7,0x34225e,0,.1,-1.5);
+ }
+}
+buildRoom(0);
 
 const colors=[
- 0xff922e,
- 0xffa8d5,
- 0x9d704d,
- 0xf4f2ed,
- 0xe98b43
+ {body:0x65b8e8,head:0x75c8f5,inner:0xffa4c5},
+ {body:0xf29ac5,head:0xffb7d9,inner:0xffe1ee},
+ {body:0xb77b4d,head:0xd59b68,inner:0x69452f},
+ {body:0xf0f0f0,head:0xffffff,inner:0x252525},
+ {body:0x9c6b48,head:0xb9845c,inner:0x70452f}
 ];
-
-// CHARACTER CREATION
-function createFriend(color,index){
-
- const root=new THREE.Group();
- const bodyMat=mat(color);
-
- // Head group
- const head=new THREE.Group();
- root.add(head);
-
- // BODY
- ball(root,0,1.2,0,.48,.68,.34,bodyMat);
- ball(root,0,1.15,.29,.30,.4,.08,cream);
-
- // HEAD CENTER Y = 2.32
- ball(head,0,2.32,0,.68,.65,.53,bodyMat);
-
- // EARS - raised above head
- for(const side of [-1,1]){
-
-  const ear=new THREE.Mesh(
-   new THREE.ConeGeometry(.25,.58,4),
-   bodyMat
-  );
-
-  ear.position.set(side*.43,2.94,0);
-  ear.rotation.z=-side*.25;
-  head.add(ear);
-
-  const inner=new THREE.Mesh(
-   new THREE.ConeGeometry(.12,.34,4),
-   pink
-  );
-
-  inner.position.set(side*.43,2.94,.15);
-  inner.rotation.z=-side*.25;
-  head.add(inner);
- }
-
- // EYES - CORRECT FACE POSITION
- for(const side of [-1,1]){
-
-  // White eyeballs
-  ball(
-   head,
-   side*.245,2.44,.485,
-   .155,.19,.085,
-   white
-  );
-
-  // Green iris
-  ball(
-   head,
-   side*.245,2.44,.558,
-   .078,.115,.045,
-   mat(0x37b878)
-  );
-
-  // Black pupils
-  ball(
-   head,
-   side*.245,2.44,.595,
-   .039,.073,.025,
-   black
-  );
-
-  // Eye highlights
-  ball(
-   head,
-   side*.245,2.49,.618,
-   .021,.024,.012,
-   white
-  );
- }
-
- // NOSE
- ball(head,0,2.28,.57,.12,.075,.07,pink);
-
- // MUZZLE
- ball(head,-.12,2.13,.48,.17,.12,.09,cream);
- ball(head,.12,2.13,.48,.17,.12,.09,cream);
-
- // MOUTH
- const mouth=new THREE.Mesh(
-  new THREE.TorusGeometry(.11,.018,8,24,Math.PI),
-  black
- );
- mouth.position.set(0,2.02,.57);
- mouth.rotation.z=Math.PI;
- head.add(mouth);
-
- // ARMS
- const arms=[];
-
- for(const side of [-1,1]){
-  const pivot=new THREE.Group();
-  pivot.position.set(side*.43,1.65,0);
-  root.add(pivot);
-
-  capsule(pivot,0,-.35,0,.115,.58,bodyMat);
-  ball(pivot,0,-.68,.03,.15,.14,.14,bodyMat);
-
-  arms.push(pivot);
- }
-
- // LEGS
- const legs=[];
-
- for(const side of [-1,1]){
-  const pivot=new THREE.Group();
-  pivot.position.set(side*.22,.62,0);
-  root.add(pivot);
-
-  capsule(pivot,0,-.26,0,.14,.42,bodyMat);
-  ball(pivot,0,-.52,.12,.22,.13,.29,cream);
-
-  legs.push(pivot);
- }
-
- // TAIL
- const curve=new THREE.CatmullRomCurve3([
-  new THREE.Vector3(0,.9,-.25),
-  new THREE.Vector3(.35,.8,-.55),
-  new THREE.Vector3(.7,1.1,-.7),
-  new THREE.Vector3(.9,1.45,-.7)
- ]);
-
- const tail=new THREE.Mesh(
-  new THREE.TubeGeometry(curve,20,.075,10,false),
-  bodyMat
- );
-
- root.add(tail);
-
- return {root,head,arms,legs,tail,index};
-}
-
-const friends=colors.map(createFriend);
-let active=0;
-
-friends.forEach((f,i)=>{
- f.root.visible=i===0;
- scene.add(f.root);
-});
-
-const current=()=>friends[active];
-
-function say(t){
- document.getElementById('speech').textContent=t;
-}
-
-// SELECT FRIEND
-window.chooseFriend=function(i){
- active=i;
-
- friends.forEach((f,n)=>{
-  f.root.visible=n===i;
- });
-
- document.querySelectorAll('.friend').forEach((b,n)=>{
-  b.classList.toggle('active',n===i);
- });
-
- say([
-  'Hi! I am Tom! 😺',
-  'Hello! I am Mimi! 💖',
-  'Hey! Bruno is here! 🐻',
-  'Hello! Coco! 🐼',
-  'Ready to play? I am Max! 🦊'
- ][i]);
-};
-
-// STATS
-let happiness=85;
-let hunger=75;
-let energy=85;
-let sleeping=false;
-let action='idle';
-let actionTime=0;
-let score=0;
-
-function updateStats(){
- document.getElementById('happy').style.width=happiness+'%';
- document.getElementById('hunger').style.width=hunger+'%';
- document.getElementById('energy').style.width=energy+'%';
- document.getElementById('score').textContent='⭐ Score: '+score;
-}
-
-// FEED
-window.feed=()=>{
- hunger=Math.min(100,hunger+20);
- happiness=Math.min(100,happiness+5);
- action='eat';
- actionTime=2;
- sleeping=false;
- say('Yummy! Thank you! 🍕');
- updateStats();
-};
-
-// BATH
-window.bath=()=>{
- action='bath';
- actionTime=3;
- sleeping=false;
- happiness=Math.min(100,happiness+10);
- say('Splash! I am clean! 🛁');
- updateStats();
-};
-
-// SLEEP
-window.sleep=()=>{
- sleeping=!sleeping;
- action='sleep';
- say(sleeping?'Good night! 😴':'I am awake! 😺');
-};
-
-// DANCE
-window.dance=()=>{
- if(energy<10){
-  say('I need some rest! 😴');
-  return;
- }
-
- energy-=10;
- action='dance';
- actionTime=4;
- sleeping=false;
- say('Dance with me! 💃');
- updateStats();
-};
-
-// MOVE
-window.move=(d)=>{
- sleeping=false;
-
- current().root.position.x=
- THREE.MathUtils.clamp(
-  current().root.position.x+d*.45,
-  -3.4,3.4
- );
-
- action='walk';
- actionTime=.7;
- say(d<0?'Going left!':'Going right!');
-};
-
-// RUN
-window.run=()=>{
- if(energy<5){
-  say('Too tired to run!');
-  return;
- }
-
- action='run';
- actionTime=2;
- sleeping=false;
- energy-=5;
-
- say('Wheeee! Running! 🏃');
- updateStats();
-};
-
-// JUMP
-window.jump=()=>{
- sleeping=false;
- action='jump';
- actionTime=1;
- energy=Math.max(0,energy-2);
- say('Boing! 😸');
- updateStats();
-};
-
-// ROOMS
-let roomIndex=0;
-
-const roomData=[
- [0x9bdcff,0x69c98c,'🏠 Living Room'],
- [0xffd8e7,0xb9a2ed,'🛏️ Bedroom'],
- [0xb7e8ff,0x8bd5d0,'🛁 Bathroom']
-];
-
-window.changeRoom=()=>{
- roomIndex=(roomIndex+1)%3;
-
- scene.background.setHex(roomData[roomIndex][0]);
- floor.material.color.setHex(roomData[roomIndex][1]);
-
- document.getElementById('topInfo').textContent=
- roomData[roomIndex][2];
-
- say('Welcome to the new room!');
-};
-
-// STARS
-let stars=[];
-
-window.startStars=()=>{
- stars.forEach(s=>scene.remove(s));
- stars=[];
-
- for(let i=0;i<6;i++){
-  const s=new THREE.Mesh(
-   new THREE.OctahedronGeometry(.24),
-   mat(0xffd52e)
-  );
-
-  s.position.set(
-   -2.7+Math.random()*5.4,
-   1.3+Math.random()*2,
-   -.1
-  );
-
-  scene.add(s);
-  stars.push(s);
- }
-
- say('Tap the golden stars to collect! ⭐');
-};
-
-const ray=new THREE.Raycaster();
-const pointer=new THREE.Vector2();
-
-renderer.domElement.addEventListener('pointerdown',e=>{
- const r=renderer.domElement.getBoundingClientRect();
-
- pointer.x=(e.clientX-r.left)/r.width*2-1;
- pointer.y=-(e.clientY-r.top)/r.height*2+1;
-
- ray.setFromCamera(pointer,camera);
-
- const hit=ray.intersectObjects(stars);
-
- if(hit.length){
-  const s=hit[0].object;
-
-  scene.remove(s);
-  stars=stars.filter(x=>x!==s);
-
-  score+=10;
-  happiness=Math.min(100,happiness+2);
-
-  say('Star collected! +10 ⭐');
-  updateStats();
-
-  if(!stars.length){
-   say('Amazing! All stars collected! 🏆');
-  }
- }else{
-  sleeping=false;
-  action='happy';
-  actionTime=1;
-  happiness=Math.min(100,happiness+1);
-  say('Hehe! That tickles! 😂');
-  updateStats();
- }
-});
-
-// TALK
-window.talk=()=>{
- const text=document.getElementById('words').value.trim();
-
- if(!text){
-  say('Type something first!');
-  return;
- }
-
- say('You said: '+text);
- action='talk';
- actionTime=2;
- sleeping=false;
-
- if('speechSynthesis' in window){
-  speechSynthesis.cancel();
-
-  const u=new SpeechSynthesisUtterance(text);
-  u.pitch=1.65;
-  u.rate=1.05;
-
-  speechSynthesis.speak(u);
- }
-};
-
-// MICROPHONE
-window.listen=()=>{
- const R=window.SpeechRecognition||window.webkitSpeechRecognition;
-
- if(!R){
-  say('Microphone not supported in this browser.');
-  return;
- }
-
- const rec=new R();
- rec.lang='en-IN';
-
- rec.onstart=()=>say('Listening... Speak now! 🎤');
-
- rec.onresult=e=>{
-  document.getElementById('words').value=
-  e.results[0][0].transcript;
-
-  talk();
- };
-
- rec.onerror=()=>say('Microphone permission unavailable.');
-
- rec.start();
-};
-
-// KEYBOARD
-window.addEventListener('keydown',e=>{
- if(e.key==='ArrowLeft')move(-1);
- if(e.key==='ArrowRight')move(1);
-
- if(e.key===' '){
-  e.preventDefault();
-  jump();
- }
-});
-
-// RESIZE
+const names=["Tom","Mimi","Bruno","Coco","Max"];
+const characters=[];
+let current=0,coins=0,action="idle",actionTime=0;
 const clock=new THREE.Clock();
 
-function resize(){
- const w=stage.clientWidth;
- const h=stage.clientHeight;
+function makeCharacter(type){
+ const c=colors[type],g=new THREE.Group();
+ const body=sphere(g,.62,c.body,0,1.05,0,.78,1.05,.7);
+ const head=new THREE.Group();
+ head.position.set(0,2.02,0);
+ g.add(head);
+ sphere(head,.68,c.head,0,0,0,1,1,.82);
 
- camera.aspect=w/h;
- camera.updateProjectionMatrix();
+ // Ears
+ if(type===3){
+  sphere(head,.23,c.inner,-.49,.48,0,1,1,.6);
+  sphere(head,.23,c.inner,.49,.48,0,1,1,.6);
+ }else{
+  const ear1=sphere(head,.25,c.head,-.48,.48,0,.72,1.3,.65);
+  const ear2=sphere(head,.25,c.head,.48,.48,0,.72,1.3,.65);
+  ear1.rotation.z=.35;ear2.rotation.z=-.35;
+  sphere(head,.13,c.inner,-.48,.48,.13,.7,1,.5);
+  sphere(head,.13,c.inner,.48,.48,.13,.7,1,.5);
+ }
+ // Eyes: placed on the front of the head
+ for(const x of [-.24,.24]){
+  sphere(head,.115,0xffffff,x,.10,.535,.9,1.1,.45);
+  sphere(head,.064,0x242033,x,.09,.59,.9,1.1,.5);
+  sphere(head,.025,0xffffff,x-.018,.12,.615);
+ }
+ // Muzzle and nose
+ sphere(head,.23,type===3?0xffffff:0xf5d2c2,0,-.20,.53,1.15,.7,.55);
+ sphere(head,.075,type===2?0x30202a:0x57313b,0,-.12,.76,1,.75,.65);
+ // Smile
+ const smile=new THREE.Mesh(
+  new THREE.TorusGeometry(.105,.018,8,20,Math.PI),
+  mat(0x542c38)
+ );
+ smile.position.set(0,-.34,.72);
+ smile.rotation.z=Math.PI;
+ head.add(smile);
 
- renderer.setSize(w,h);
+ // Arms and legs
+ const arms=[];
+ for(const x of [-.62,.62]){
+  const a=sphere(g,.17,c.body,x,1.25,0,1,1.7,1);
+  a.rotation.z=x<0?-.35:.35;arms.push(a);
+ }
+ const legs=[];
+ for(const x of [-.29,.29]){
+  const l=sphere(g,.2,c.body,x,.38,0,1,.95,1);
+  sphere(g,.21,type===3?0x333333:0xf0c9a4,x,.18,.12,1,.6,1);
+  legs.push(l);
+ }
+ // Tail
+ const tail=sphere(g,.16,c.body,.55,.85,-.3,1,1,2);
+ tail.rotation.x=1;
+ g.userData={head,arms,legs,tail,body,smile};
+ g.position.set((type-2)*1.25,0,0);
+ scene.add(g);
+ return g;
 }
 
-window.addEventListener('resize',resize);
-resize();
+for(let i=0;i<5;i++)characters.push(makeCharacter(i));
 
-// ANIMATION
+function say(text){
+ const msg=document.getElementById("message");
+ msg.textContent=text;msg.style.display="block";
+ clearTimeout(say.timer);
+ say.timer=setTimeout(()=>msg.style.display="none",1700);
+ if("speechSynthesis" in window){
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.rate=1;u.pitch=1.2;speechSynthesis.speak(u);
+ }
+}
+function setAction(a){
+ action=a;actionTime=0;
+ const lines={
+  feed:"Yummy! Thank you! 🍎",
+  bath:"Bubble bubble! So fresh! 🫧",
+  sleep:"Good night! 😴",
+  dance:"Let's dance! 🎵",
+  jump:"Wheeee! 🦘",
+  talk:"Hello! I am "+names[current]+"!"
+ };
+ say(lines[a]||"Hello!");
+ if(a==="feed"||a==="bath"||a==="dance")addCoins(2);
+ if(a==="sleep")characters[current].userData.head.rotation.x=-.15;
+}
+function addCoins(n){
+ coins+=n;document.getElementById("coins").textContent=coins;
+}
+document.getElementById("feed").onclick=()=>setAction("feed");
+document.getElementById("bath").onclick=()=>setAction("bath");
+document.getElementById("sleep").onclick=()=>setAction("sleep");
+document.getElementById("dance").onclick=()=>setAction("dance");
+document.getElementById("jump").onclick=()=>setAction("jump");
+document.getElementById("talk").onclick=()=>setAction("talk");
+document.getElementById("collect").onclick=collectStar;
+
+document.querySelectorAll("[data-friend]").forEach(b=>{
+ b.onclick=()=>{
+  current=Number(b.dataset.friend);
+  document.querySelectorAll("[data-friend]").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active");
+  characters.forEach((c,i)=>c.visible=i===current);
+  action="idle";say("Hello! I am "+names[current]+"!");
+ };
+});
+document.querySelectorAll("[data-room]").forEach(b=>{
+ b.onclick=()=>{
+  buildRoom(Number(b.dataset.room));
+  document.querySelectorAll("[data-room]").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active");
+  say("Welcome to the "+b.textContent.replace(/[^\w ]/g,"")+"!");
+ };
+});
+
+const keys={};
+let moving={forward:false,back:false,left:false,right:false};
+function moveStart(dir){moving[dir]=true}
+function moveStop(dir){moving[dir]=false}
+document.querySelectorAll("[data-move]").forEach(b=>{
+ const d=b.dataset.move;
+ b.addEventListener("pointerdown",e=>{e.preventDefault();moveStart(d)});
+ b.addEventListener("pointerup",()=>moveStop(d));
+ b.addEventListener("pointerleave",()=>moveStop(d));
+ b.addEventListener("pointercancel",()=>moveStop(d));
+});
+window.addEventListener("keydown",e=>{
+ keys[e.key.toLowerCase()]=true;
+ if(e.key===" "){setAction("jump");}
+});
+window.addEventListener("keyup",e=>keys[e.key.toLowerCase()]=false);
+
+const stars=[];
+const starMat=mat(0xffd83d,.35);
+function spawnStar(){
+ const s=new THREE.Mesh(new THREE.OctahedronGeometry(.25),starMat);
+ s.position.set((Math.random()-.5)*7,.55,(Math.random()-.5)*5-1);
+ s.castShadow=true;scene.add(s);stars.push(s);
+}
+for(let i=0;i<7;i++)spawnStar();
+
+function collectStar(){
+ const p=characters[current].position;
+ let nearest=-1,dist=999;
+ stars.forEach((s,i)=>{
+  const d=s.position.distanceTo(new THREE.Vector3(p.x,1,p.z));
+  if(d<dist){dist=d;nearest=i}
+ });
+ if(nearest>=0&&dist<2.5){
+  scene.remove(stars[nearest]);stars.splice(nearest,1);
+  addCoins(5);say("Star collected! +5 coins ⭐");spawnStar();
+ }else say("Move closer to a star!");
+}
+
+let elapsed=0;
 function animate(){
  requestAnimationFrame(animate);
-
  const dt=Math.min(clock.getDelta(),.05);
- const t=clock.elapsedTime;
+ elapsed+=dt;actionTime+=dt;
+ const c=characters[current],u=c.userData;
+ let dx=0,dz=0;
+ if(moving.forward||keys.w||keys.arrowup)dz-=1;
+ if(moving.back||keys.s||keys.arrowdown)dz+=1;
+ if(moving.left||keys.a||keys.arrowleft)dx-=1;
+ if(moving.right||keys.d||keys.arrowright)dx+=1;
+ const isMoving=dx!==0||dz!==0;
+ if(isMoving){
+  const len=Math.hypot(dx,dz);dx/=len;dz/=len;
+  c.position.x+=dx*dt*3.1;c.position.z+=dz*dt*3.1;
+  c.rotation.y=Math.atan2(dx,dz);
+ }
+ c.position.x=THREE.MathUtils.clamp(c.position.x,-5.5,5.5);
+ c.position.z=THREE.MathUtils.clamp(c.position.z,-3.8,3.5);
 
- if(actionTime>0)actionTime-=dt;
- else if(action!=='idle')action='idle';
+ characters.forEach((ch,i)=>{
+  if(i!==current){
+   ch.visible=false;return;
+  }
+  ch.visible=true;
+  const data=ch.userData;
+  const walking=isMoving;
+  const wave=Math.sin(elapsed*8);
+  data.head.position.y=2.02+(walking?Math.abs(wave)*.04:Math.sin(elapsed*2)*.025);
+  data.head.rotation.z=walking?Math.sin(elapsed*8)*.08:0;
+  data.legs.forEach((l,j)=>{l.rotation.x=walking?Math.sin(elapsed*9+j*Math.PI)*.5:0});
+  data.arms.forEach((a,j)=>{a.rotation.z=(j===0?-.35:.35)+(walking?Math.sin(elapsed*9+j*Math.PI)*.4:0)});
+  data.tail.rotation.z=Math.sin(elapsed*4)*.4;
 
- friends.forEach(f=>{
-  if(!f.root.visible)return;
-
-  f.root.position.y=
-   sleeping&&f.index===active
-   ?-.12
-   :Math.sin(t*3)*.035;
-
-  f.head.rotation.z=Math.sin(t*1.7)*.025;
-  f.tail.rotation.y=Math.sin(t*3)*.25;
-
-  f.arms.forEach(a=>a.rotation.z=0);
-  f.legs.forEach(l=>l.rotation.x=0);
-
-  if(f.index===active){
-
-   if(action==='dance'){
-    f.arms[0].rotation.z=Math.sin(t*12)*.8;
-    f.arms[1].rotation.z=-Math.sin(t*12)*.8;
-
-    f.legs[0].rotation.x=Math.sin(t*12)*.45;
-    f.legs[1].rotation.x=-Math.sin(t*12)*.45;
-   }
-
-   if(action==='walk'||action==='run'){
-    const speed=action==='run'?13:8;
-
-    f.legs[0].rotation.x=Math.sin(t*speed)*.65;
-    f.legs[1].rotation.x=-Math.sin(t*speed)*.65;
-
-    f.arms[0].rotation.z=-Math.sin(t*speed)*.45;
-    f.arms[1].rotation.z=Math.sin(t*speed)*.45;
-   }
-
-   if(action==='jump'){
-    f.root.position.y=Math.abs(Math.sin(t*9))*.8;
-   }
-
-   if(action==='eat'){
-    f.arms[1].rotation.z=-1;
-   }
-
-   if(action==='bath'){
-    f.arms[0].rotation.z=Math.sin(t*10)*.7;
-    f.arms[1].rotation.z=-Math.sin(t*10)*.7;
-   }
-
-   if(action==='talk'){
-    f.arms[1].rotation.z=-.5;
-   }
-
-   if(sleeping){
-    f.head.rotation.x=.16;
-   }
+  if(action==="dance"&&actionTime<5){
+   ch.rotation.y+=dt*3;
+   ch.position.y=Math.abs(Math.sin(elapsed*9))*.18;
+  }else if(action==="jump"&&actionTime<1.1){
+   ch.position.y=Math.sin(Math.PI*Math.min(actionTime/1.1,1))*.85;
+  }else if(action==="sleep"&&actionTime<5){
+   data.head.rotation.x=-.18;
+  }else{
+   ch.position.y=0;
+   if(actionTime>5){action="idle";data.head.rotation.x=0}
   }
  });
-
- stars.forEach(s=>s.rotation.y+=dt*2);
-
+ stars.forEach((s,i)=>{
+  s.rotation.y+=dt*1.8;s.rotation.x+=dt;
+  s.position.y=.55+Math.sin(elapsed*2+i)*.12;
+ });
+ camera.position.x+=(c.position.x*.22-camera.position.x)*dt*2;
+ camera.position.z+=(9-camera.position.z)*dt*2;
+ camera.lookAt(c.position.x,1.35,c.position.z);
  renderer.render(scene,camera);
 }
-
 animate();
-updateStats();
 
-setInterval(()=>{
- if(sleeping){
-  energy=Math.min(100,energy+3);
- }else{
-  hunger=Math.max(0,hunger-.2);
-  energy=Math.max(0,energy-.08);
- }
-
- updateStats();
-},3000);
-
+window.addEventListener("resize",()=>{
+ camera.aspect=innerWidth/innerHeight;
+ camera.updateProjectionMatrix();
+ renderer.setSize(innerWidth,innerHeight);
+});
+say("Welcome to Shubham Talking Tom Friends 3D V3!");
 </script>
 </body>
 </html>
+
