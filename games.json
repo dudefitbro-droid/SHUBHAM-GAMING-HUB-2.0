@@ -43,5 +43,13 @@
     "image": "https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=800",
     "category": "Arcade",
     "url": "/games/shubham-runner-3d/index.html"
+  },
+  {
+    "id": "my-talking-tom-friends",
+    "title": "MY TALKING TOM FRIENDS",
+    "description": "Join Tom, Angela, Hank, Ben, Becca and Ginger in this fun virtual pet adventure!",
+    "image": "https://play-lh.googleusercontent.com/placeholder",
+    "category": "Simulation",
+    "url": "https://now.gg/apps/outfit-limited/5645/my-talking-tom-friends.html"
   }
 ]
