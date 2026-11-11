@@ -4,436 +4,425 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>SHUBHAM TALKING TOM FRIENDS 3D</title>
+<title>SHUBHAM TALKING TOM FRIENDS 3D V2.1</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{
-  background:#10152b;color:white;
-  font-family:Arial,sans-serif;
-  overflow:hidden;
-}
-header{
-  height:65px;background:#171e3d;
-  display:flex;align-items:center;
-  justify-content:space-between;padding:0 15px;
-  border-bottom:2px solid #ff9b31;
-}
-header h2{font-size:17px;color:#ffae43}
-header span{font-size:12px;color:#a8c6ff}
-#game{width:100%;height:calc(100dvh - 220px);min-height:280px}
-canvas{display:block}
-.stats{
-  display:grid;grid-template-columns:repeat(3,1fr);
-  gap:8px;padding:10px;
-  background:#171e3d;
-}
-.stat{
-  background:#252e50;border-radius:12px;
-  padding:9px;text-align:center;font-size:12px;
-}
-.bar{
-  height:8px;background:#424c70;
-  border-radius:20px;margin-top:7px;overflow:hidden;
-}
-.fill{height:100%;width:75%;background:#53e69a;transition:.3s}
-.controls{
-  display:grid;grid-template-columns:repeat(4,1fr);
-  gap:8px;padding:10px;
-  background:#11172e;
-}
-button{
-  border:0;border-radius:12px;padding:13px 3px;
-  background:#ff9b31;color:#24152b;
-  font-weight:bold;font-size:13px;
-  cursor:pointer;
-}
+body{background:#11162c;color:white;font-family:Arial;overflow:hidden}
+header{height:55px;background:#171e3d;display:flex;align-items:center;justify-content:space-between;padding:0 12px}
+header h2{font-size:14px;color:#ffad43}
+header span{font-size:11px;color:#b8c8ff}
+#stage{height:40vh;min-height:240px;position:relative}
+#stage canvas{display:block;width:100%;height:100%}
+#speech{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:white;color:#222;padding:9px 14px;border-radius:20px;font-size:13px;font-weight:bold;white-space:nowrap;max-width:90%;overflow:hidden;text-overflow:ellipsis}
+#topInfo{position:absolute;bottom:8px;left:10px;font-size:12px;background:#151b35cc;padding:8px 12px;border-radius:12px}
+#score{position:absolute;right:10px;bottom:8px;background:#171e3d;padding:8px 12px;border-radius:12px;font-size:12px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:7px;background:#171e3d}
+.stat{background:#273253;border-radius:10px;padding:7px;text-align:center;font-size:11px}
+.bar{height:7px;background:#485474;border-radius:20px;margin-top:6px;overflow:hidden}
+.fill{height:100%;width:75%;background:#52e69c;transition:.3s}
+.panel{background:#11172e;padding:7px}
+.panelTitle{font-size:10px;color:#9fb4e8;margin:0 0 6px 3px}
+.friends,.controls{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+button{border:0;border-radius:10px;background:#ff9b31;color:#24152b;font-weight:bold;padding:10px 2px;font-size:11px;cursor:pointer}
 button:active{transform:scale(.94)}
-.talk{
-  display:flex;gap:7px;padding:8px 10px;
-  background:#11172e;
-}
-input{
-  flex:1;min-width:0;border:0;border-radius:10px;
-  padding:11px;background:#252e50;color:white;
-}
-.talk button{padding:10px 15px}
-#message{
-  position:absolute;top:78px;left:50%;
-  transform:translateX(-50%);
-  background:#fff;color:#222;
-  padding:10px 18px;border-radius:20px;
-  font-weight:bold;font-size:14px;
-  z-index:5;white-space:nowrap;
-}
+.friend{background:#293456;color:white;border:1px solid #53648e}
+.friend.active{background:#ff9b31;color:#24152b;border:2px solid white}
+.controls{grid-template-columns:repeat(4,1fr)}
+.controls button{background:#34446d;color:white}
+.controls button.primary{background:#ff9b31;color:#25152a}
+.talk{display:flex;gap:6px;padding:7px;background:#11172e}
+input{flex:1;min-width:0;background:#263252;color:white;border:1px solid #53648e;border-radius:10px;padding:10px}
+.talk button{padding:10px}
 @media(min-width:700px){
-  #game{height:calc(100dvh - 210px)}
-  .controls{padding:10px 15%;gap:15px}
-  .stats{padding:10px 20%}
-  .talk{padding:8px 20%}
+#stage{height:45vh}
+.stats{padding-left:20%;padding-right:20%}
+.friends{padding-left:12%;padding-right:12%}
+.controls{padding-left:15%;padding-right:15%}
+.talk{padding-left:20%;padding-right:20%}
 }
 </style>
 </head>
 <body>
 
 <header>
-  <h2>🐱 SHUBHAM TOM 3D</h2>
-  <span>V1.0 • Virtual Pet</span>
+<h2>🐱 SHUBHAM TOM FRIENDS 3D</h2>
+<span>VERSION 2.1</span>
 </header>
 
-<div id="message">Hello! I am Tom 😺</div>
-
-<div id="game"></div>
-
-<div class="stats">
-  <div class="stat">❤️ Happiness
-    <div class="bar"><div class="fill" id="happy"></div></div>
-  </div>
-  <div class="stat">🍕 Hunger
-    <div class="bar"><div class="fill" id="hunger"></div></div>
-  </div>
-  <div class="stat">⚡ Energy
-    <div class="bar"><div class="fill" id="energy"></div></div>
-  </div>
+<div id="stage">
+<div id="speech">Hello! I am Tom! 😺</div>
+<div id="topInfo">🏠 Living Room</div>
+<div id="score">⭐ Score: 0</div>
 </div>
 
+<div class="stats">
+<div class="stat">❤️ Happiness<div class="bar"><div class="fill" id="happy"></div></div></div>
+<div class="stat">🍕 Hunger<div class="bar"><div class="fill" id="hunger"></div></div></div>
+<div class="stat">⚡ Energy<div class="bar"><div class="fill" id="energy"></div></div></div>
+</div>
+
+<div class="panel">
+<div class="panelTitle">CHOOSE YOUR FRIEND</div>
+<div class="friends">
+<button class="friend active" onclick="chooseFriend(0)">🐱 Tom</button>
+<button class="friend" onclick="chooseFriend(1)">🐰 Mimi</button>
+<button class="friend" onclick="chooseFriend(2)">🐻 Bruno</button>
+<button class="friend" onclick="chooseFriend(3)">🐼 Coco</button>
+<button class="friend" onclick="chooseFriend(4)">🦊 Max</button>
+</div>
+</div>
+
+<div class="panel">
+<div class="panelTitle">MOVE & PLAY</div>
 <div class="controls">
-  <button onclick="feed()">🍕 FEED</button>
-  <button onclick="bath()">🛁 BATH</button>
-  <button onclick="sleep()">😴 SLEEP</button>
-  <button onclick="dance()">💃 DANCE</button>
+<button onclick="move(-1)">⬅ LEFT</button>
+<button onclick="move(1)">RIGHT ➡</button>
+<button onclick="jump()">⬆ JUMP</button>
+<button onclick="run()">🏃 RUN</button>
+<button class="primary" onclick="feed()">🍕 FEED</button>
+<button class="primary" onclick="bath()">🛁 BATH</button>
+<button class="primary" onclick="sleep()">😴 SLEEP</button>
+<button class="primary" onclick="dance()">💃 DANCE</button>
+<button onclick="changeRoom()">🏠 ROOM</button>
+<button onclick="startStars()">⭐ STARS</button>
+<button onclick="talk()">🔊 TALK</button>
+<button onclick="listen()">🎤 MIC</button>
+</div>
 </div>
 
 <div class="talk">
-  <input id="words" placeholder="Say something to Tom...">
-  <button onclick="talk()">🎤 TALK</button>
+<input id="words" placeholder="Talk to your friend...">
+<button onclick="talk()">SEND</button>
 </div>
 
 <script type="module">
 import * as THREE from
 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x9bdcff);
-scene.fog = new THREE.Fog(0x9bdcff,12,30);
+const stage=document.getElementById('stage');
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x9bdcff);
 
-const camera = new THREE.PerspectiveCamera(
-  45,innerWidth/(innerHeight-220),0.1,100
-);
-camera.position.set(0,2.5,9);
-camera.lookAt(0,1.3,0);
+const camera=new THREE.PerspectiveCamera(42,1,.1,100);
+camera.position.set(0,3.1,9);
+camera.lookAt(0,1.55,0);
 
-const renderer = new THREE.WebGLRenderer({antialias:true});
+const renderer=new THREE.WebGLRenderer({antialias:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-renderer.setSize(innerWidth,innerHeight-220);
 renderer.shadowMap.enabled=true;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-document.getElementById('game').appendChild(renderer.domElement);
+stage.appendChild(renderer.domElement);
 
-scene.add(new THREE.HemisphereLight(0xffffff,0x63749a,2));
+scene.add(new THREE.HemisphereLight(0xffffff,0x7580a0,2));
+const sun=new THREE.DirectionalLight(0xffffff,2.5);
+sun.position.set(4,8,6);
+sun.castShadow=true;
+scene.add(sun);
 
-const light=new THREE.DirectionalLight(0xffffff,2.5);
-light.position.set(4,8,6);
-light.castShadow=true;
-scene.add(light);
+const mat=(c)=>new THREE.MeshStandardMaterial({color:c,roughness:.7});
+const white=mat(0xffffff),black=mat(0x20202b);
+const pink=mat(0xff83a8),cream=mat(0xffe0b5);
 
-function mat(color){
- return new THREE.MeshStandardMaterial({color,roughness:.7});
+function ball(p,x,y,z,sx,sy,sz,m){
+ const o=new THREE.Mesh(new THREE.SphereGeometry(1,32,24),m);
+ o.position.set(x,y,z);o.scale.set(sx,sy,sz);
+ o.castShadow=true;p.add(o);return o;
 }
-const orange=mat(0xff922e);
-const cream=mat(0xffdfb0);
-const pink=mat(0xff7e9e);
-const black=mat(0x20202b);
-const white=mat(0xffffff);
-const green=mat(0x42d99a);
-
-function sphere(parent,x,y,z,sx,sy,sz,material){
- const m=new THREE.Mesh(
-  new THREE.SphereGeometry(1,32,24),material
- );
- m.position.set(x,y,z);
- m.scale.set(sx,sy,sz);
- m.castShadow=true;
- parent.add(m);
- return m;
+function capsule(p,x,y,z,r,l,m){
+ const o=new THREE.Mesh(new THREE.CapsuleGeometry(r,l,5,12),m);
+ o.position.set(x,y,z);o.castShadow=true;p.add(o);return o;
 }
 
-function limb(parent,x,y,z,length,material){
- const m=new THREE.Mesh(
-  new THREE.CapsuleGeometry(.13,length-.26,5,12),material
- );
- m.position.set(x,y,z);
- m.castShadow=true;
- parent.add(m);
- return m;
+// Room
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(18,18),mat(0x69c98c));
+floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);
+const wall=new THREE.Mesh(new THREE.BoxGeometry(15,8,.25),mat(0xf1d9ff));
+wall.position.set(0,3.5,-3.5);scene.add(wall);
+
+function furniture(x,y,z,sx,sy,sz,c){
+ const o=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),mat(c));
+ o.position.set(x,y,z);o.castShadow=true;scene.add(o);
+}
+furniture(-2,.45,-.7,2.2,.9,1.1,0x9b633f);
+furniture(2,.3,-1.4,1.5,.6,.8,0x5599dd);
+furniture(0,2.1,-3.1,2.1,.12,.2,0xffc95c);
+
+const colors=[0xff922e,0xffa8d5,0x9d704d,0xf4f2ed,0xe98b43];
+
+function createFriend(color,index){
+ const root=new THREE.Group();
+ const bodyMat=mat(color);
+ const head=new THREE.Group();
+ root.add(head);
+
+ // Body and belly
+ ball(root,0,1.2,0,.48,.68,.34,bodyMat);
+ ball(root,0,1.15,.29,.30,.4,.08,cream);
+
+ // Head
+ ball(head,0,2.32,0,.68,.65,.53,bodyMat);
+
+ // Ears
+ for(const side of [-1,1]){
+  const ear=new THREE.Mesh(new THREE.ConeGeometry(.25,.58,4),bodyMat);
+  ear.position.set(side*.43,.62,0);
+  ear.rotation.z=-side*.25;head.add(ear);
+  const inner=new THREE.Mesh(new THREE.ConeGeometry(.12,.34,4),pink);
+  inner.position.set(side*.43,.62,.15);
+  inner.rotation.z=-side*.25;head.add(inner);
+ }
+
+ // EYES - raised to upper-middle face
+ for(const side of [-1,1]){
+  ball(head,side*.24,.25,.475,.17,.20,.09,white);
+  ball(head,side*.24,.25,.555,.085,.12,.045,mat(0x37b878));
+  ball(head,side*.24,.25,.592,.043,.075,.025,black);
+  ball(head,side*.24,.30,.612,.022,.025,.012,white);
+ }
+
+ // Nose and muzzle
+ ball(head,0,-.04,.57,.12,.075,.07,pink);
+ ball(head,-.12,-.19,.48,.17,.12,.09,cream);
+ ball(head,.12,-.19,.48,.17,.12,.09,cream);
+
+ // Mouth
+ const mouth=new THREE.Mesh(new THREE.TorusGeometry(.11,.018,8,24,Math.PI),black);
+ mouth.position.set(0,-.30,.57);
+ mouth.rotation.z=Math.PI;head.add(mouth);
+
+ // Arms
+ const arms=[];
+ for(const side of [-1,1]){
+  const pivot=new THREE.Group();
+  pivot.position.set(side*.43,1.65,0);root.add(pivot);
+  capsule(pivot,0,-.35,0,.115,.58,bodyMat);
+  ball(pivot,0,-.68,.03,.15,.14,.14,bodyMat);
+  arms.push(pivot);
+ }
+
+ // Legs
+ const legs=[];
+ for(const side of [-1,1]){
+  const pivot=new THREE.Group();
+  pivot.position.set(side*.22,.62,0);root.add(pivot);
+  capsule(pivot,0,-.26,0,.14,.42,bodyMat);
+  ball(pivot,0,-.52,.12,.22,.13,.29,cream);
+  legs.push(pivot);
+ }
+
+ // Tail
+ const curve=new THREE.CatmullRomCurve3([
+  new THREE.Vector3(0,.9,-.25),
+  new THREE.Vector3(.35,.8,-.55),
+  new THREE.Vector3(.7,1.1,-.7),
+  new THREE.Vector3(.9,1.45,-.7)
+ ]);
+ const tail=new THREE.Mesh(new THREE.TubeGeometry(curve,20,.075,10,false),bodyMat);
+ root.add(tail);
+
+ return {root,head,arms,legs,tail,index};
 }
 
-// Floor
-const floor=new THREE.Mesh(
- new THREE.CircleGeometry(8,64),
- mat(0x65cf93)
-);
-floor.rotation.x=-Math.PI/2;
-floor.position.y=-.04;
-floor.receiveShadow=true;
-scene.add(floor);
+const friends=colors.map(createFriend);
+let active=0;
+friends.forEach((f,i)=>{f.root.visible=i===0;scene.add(f.root);});
+const current=()=>friends[active];
 
-// House background
-const wall=new THREE.Mesh(
- new THREE.BoxGeometry(13,7,.2),
- mat(0xf0d8ff)
-);
-wall.position.set(0,3,-3);
-scene.add(wall);
+function say(t){document.getElementById('speech').textContent=t;}
 
-// Tom group
-const tom=new THREE.Group();
-scene.add(tom);
+window.chooseFriend=function(i){
+ active=i;
+ friends.forEach((f,n)=>f.root.visible=n===i);
+ document.querySelectorAll('.friend').forEach((b,n)=>b.classList.toggle('active',n===i));
+ say(['Hi! I am Tom! 😺','Hello! I am Mimi! 💖','Hey! Bruno is here! 🐻','Hello! Coco! 🐼','Ready to play? I am Max! 🦊'][i]);
+};
 
-// Body – upright humanoid shape
-const body=sphere(tom,0,1.25,0,.53,.78,.36,orange);
-sphere(tom,0,1.18,.32,.34,.48,.09,cream);
-
-// Head
-const head=new THREE.Group();
-head.position.set(0,2.38,0);
-tom.add(head);
-
-sphere(head,0,0,0,.76,.72,.58,orange);
-
-// Ears
-function ear(x,rot){
- const e=new THREE.Mesh(
-  new THREE.ConeGeometry(.29,.68,4),orange
- );
- e.position.set(x,.69,0);
- e.rotation.z=rot;
- e.castShadow=true;
- head.add(e);
- const inside=new THREE.Mesh(
-  new THREE.ConeGeometry(.16,.39,4),pink
- );
- inside.position.set(x,.70,.15);
- inside.rotation.z=rot;
- head.add(inside);
-}
-ear(-.48,.42);
-ear(.48,-.42);
-
-// Eyes
-sphere(head,-.28,.12,.51,.18,.22,.10,white);
-sphere(head,.28,.12,.51,.18,.22,.10,white);
-sphere(head,-.27,.12,.60,.085,.12,.055,green);
-sphere(head,.27,.12,.60,.085,.12,.055,green);
-sphere(head,-.27,.12,.65,.045,.08,.03,black);
-sphere(head,.27,.12,.65,.045,.08,.03,black);
-
-// Nose and muzzle
-sphere(head,0,-.12,.62,.13,.09,.08,pink);
-sphere(head,-.13,-.27,.53,.20,.14,.12,cream);
-sphere(head,.13,-.27,.53,.20,.14,.12,cream);
-
-// Mouth
-const mouth=new THREE.Mesh(
- new THREE.TorusGeometry(.12,.018,8,24,Math.PI),
- black
-);
-mouth.position.set(0,-.35,.61);
-mouth.rotation.z=Math.PI;
-head.add(mouth);
-
-// Arms
-const leftArm=new THREE.Group();
-leftArm.position.set(-.48,1.75,0);
-tom.add(leftArm);
-limb(leftArm,0,-.35,0,.85,orange);
-sphere(leftArm,0,-.78,.02,.18,.17,.16,orange);
-
-const rightArm=new THREE.Group();
-rightArm.position.set(.48,1.75,0);
-tom.add(rightArm);
-limb(rightArm,0,-.35,0,.85,orange);
-sphere(rightArm,0,-.78,.02,.18,.17,.16,orange);
-
-// Legs and feet
-const leftLeg=new THREE.Group();
-leftLeg.position.set(-.25,.62,0);
-tom.add(leftLeg);
-limb(leftLeg,0,-.27,0,.65,orange);
-sphere(leftLeg,0,-.56,.13,.25,.14,.34,cream);
-
-const rightLeg=new THREE.Group();
-rightLeg.position.set(.25,.62,0);
-tom.add(rightLeg);
-limb(rightLeg,0,-.27,0,.65,orange);
-sphere(rightLeg,0,-.56,.13,.25,.14,.34,cream);
-
-// Tail
-const tailCurve=new THREE.CatmullRomCurve3([
- new THREE.Vector3(0,.9,-.3),
- new THREE.Vector3(.5,.8,-.65),
- new THREE.Vector3(.9,1.2,-.8),
- new THREE.Vector3(1.05,1.5,-.8)
-]);
-const tail=new THREE.Mesh(
- new THREE.TubeGeometry(tailCurve,32,.09,12,false),orange
-);
-tom.add(tail);
-
-// Furniture
-const table=new THREE.Mesh(
- new THREE.BoxGeometry(2,.15,.8),mat(0x9b633f)
-);
-table.position.set(-2,.85,-.3);
-scene.add(table);
-
-tom.position.y=0;
-
-let happiness=80,hunger=75,energy=80;
-let action='idle';
-let actionTime=0;
-let sleeping=false;
-
-const message=document.getElementById('message');
-
-function say(text){
- message.textContent=text;
-}
+// Stats
+let happiness=85,hunger=75,energy=85;
+let sleeping=false,action='idle',actionTime=0,score=0;
 
 function updateStats(){
  document.getElementById('happy').style.width=happiness+'%';
  document.getElementById('hunger').style.width=hunger+'%';
  document.getElementById('energy').style.width=energy+'%';
+ document.getElementById('score').textContent='⭐ Score: '+score;
 }
 
-window.feed=function(){
- if(hunger>=100){say("I'm already full! 😋");return;}
+window.feed=()=>{
  hunger=Math.min(100,hunger+20);
  happiness=Math.min(100,happiness+5);
- action='eat';actionTime=2;
- sleeping=false;
- say("Yummy! Thank you! 🍕");
- updateStats();
+ action='eat';actionTime=2;sleeping=false;
+ say('Yummy! Thank you! 🍕');updateStats();
 };
-
-window.bath=function(){
- action='bath';actionTime=3;
- sleeping=false;
+window.bath=()=>{
+ action='bath';actionTime=3;sleeping=false;
  happiness=Math.min(100,happiness+10);
- say("Splash splash! I am clean! 🛁");
- updateStats();
+ say('Splash! I am clean! 🛁');updateStats();
 };
-
-window.sleep=function(){
- sleeping=!sleeping;
- action='sleep';actionTime=0;
- say(sleeping?"Good night! 😴":"I am awake! 😺");
+window.sleep=()=>{
+ sleeping=!sleeping;action='sleep';
+ say(sleeping?'Good night! 😴':'I am awake! 😺');
 };
-
-window.dance=function(){
- if(energy<10){say("I am too tired! 😴");return;}
- action='dance';actionTime=4;
+window.dance=()=>{
+ if(energy<10){say('I need some rest! 😴');return;}
+ energy-=10;action='dance';actionTime=4;sleeping=false;
+ say('Dance with me! 💃');updateStats();
+};
+window.move=(d)=>{
  sleeping=false;
- energy=Math.max(0,energy-10);
- say("Let's dance! 💃");
- updateStats();
+ current().root.position.x=THREE.MathUtils.clamp(current().root.position.x+d*.45,-3.4,3.4);
+ action='walk';actionTime=.7;
+ say(d<0?'Going left!':'Going right!');
+};
+window.run=()=>{
+ if(energy<5){say('Too tired to run!');return;}
+ action='run';actionTime=2;sleeping=false;energy-=5;
+ say('Wheeee! Running! 🏃');updateStats();
+};
+window.jump=()=>{
+ sleeping=false;action='jump';actionTime=1;
+ energy=Math.max(0,energy-2);say('Boing! 😸');updateStats();
 };
 
-window.talk=function(){
- const text=document.getElementById('words').value.trim();
- if(!text)return;
- say("You said: "+text);
- action='talk';actionTime=2;
- sleeping=false;
- if('speechSynthesis' in window){
-  speechSynthesis.cancel();
-  const speech=new SpeechSynthesisUtterance(text);
-  speech.pitch=1.8;
-  speech.rate=1.1;
-  speechSynthesis.speak(speech);
+// Rooms
+let roomIndex=0;
+const roomData=[
+ [0x9bdcff,0x69c98c,'🏠 Living Room'],
+ [0xffd8e7,0xb9a2ed,'🛏️ Bedroom'],
+ [0xb7e8ff,0x8bd5d0,'🛁 Bathroom']
+];
+window.changeRoom=()=>{
+ roomIndex=(roomIndex+1)%3;
+ scene.background.setHex(roomData[roomIndex][0]);
+ floor.material.color.setHex(roomData[roomIndex][1]);
+ document.getElementById('topInfo').textContent=roomData[roomIndex][2];
+ say('Welcome to the new room!');
+};
+
+// Star game
+let stars=[];
+window.startStars=()=>{
+ stars.forEach(s=>scene.remove(s));stars=[];
+ for(let i=0;i<6;i++){
+  const s=new THREE.Mesh(new THREE.OctahedronGeometry(.24),mat(0xffd52e));
+  s.position.set(-2.7+Math.random()*5.4,1.3+Math.random()*2,-.1);
+  scene.add(s);stars.push(s);
  }
+ say('Tap the golden stars to collect! ⭐');
 };
-
-renderer.domElement.addEventListener('pointerdown',()=>{
- if(sleeping){sleeping=false;}
- action='happy';actionTime=2;
- happiness=Math.min(100,happiness+5);
- say("Hehe! That tickles! 😂");
- updateStats();
+const ray=new THREE.Raycaster(),pointer=new THREE.Vector2();
+renderer.domElement.addEventListener('pointerdown',e=>{
+ const r=renderer.domElement.getBoundingClientRect();
+ pointer.x=(e.clientX-r.left)/r.width*2-1;
+ pointer.y=-(e.clientY-r.top)/r.height*2+1;
+ ray.setFromCamera(pointer,camera);
+ const hit=ray.intersectObjects(stars);
+ if(hit.length){
+  const s=hit[0].object;scene.remove(s);
+  stars=stars.filter(x=>x!==s);
+  score+=10;happiness=Math.min(100,happiness+2);
+  say('Star collected! +10 ⭐');updateStats();
+  if(!stars.length)say('Amazing! All stars collected! 🏆');
+ }else{
+  sleeping=false;action='happy';actionTime=1;
+  happiness=Math.min(100,happiness+1);say('Hehe! That tickles! 😂');updateStats();
+ }
 });
 
-let clock=new THREE.Clock();
+// Talking and microphone
+window.talk=()=>{
+ const text=document.getElementById('words').value.trim();
+ if(!text){say('Type something first!');return;}
+ say('You said: '+text);action='talk';actionTime=2;sleeping=false;
+ if('speechSynthesis' in window){
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.pitch=1.65;u.rate=1.05;speechSynthesis.speak(u);
+ }
+};
+window.listen=()=>{
+ const R=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!R){say('Microphone not supported in this browser.');return;}
+ const rec=new R();rec.lang='en-IN';
+ rec.onstart=()=>say('Listening... Speak now! 🎤');
+ rec.onresult=e=>{
+  document.getElementById('words').value=e.results[0][0].transcript;
+  talk();
+ };
+ rec.onerror=()=>say('Microphone permission unavailable.');
+ rec.start();
+};
+
+window.addEventListener('keydown',e=>{
+ if(e.key==='ArrowLeft')move(-1);
+ if(e.key==='ArrowRight')move(1);
+ if(e.key===' '){e.preventDefault();jump();}
+});
+
+const clock=new THREE.Clock();
+
+function resize(){
+ const w=stage.clientWidth,h=stage.clientHeight;
+ camera.aspect=w/h;camera.updateProjectionMatrix();
+ renderer.setSize(w,h);
+}
+window.addEventListener('resize',resize);
+resize();
 
 function animate(){
  requestAnimationFrame(animate);
- const t=clock.getElapsedTime();
  const dt=Math.min(clock.getDelta(),.05);
-
+ const t=clock.elapsedTime;
  if(actionTime>0)actionTime-=dt;
  else if(action!=='idle')action='idle';
 
- if(!sleeping){
-  tom.position.y=Math.sin(t*3)*.045;
-  head.rotation.z=Math.sin(t*1.7)*.035;
- }else{
-  tom.position.y=-.12;
-  head.rotation.z=.15;
- }
+ friends.forEach(f=>{
+  if(!f.root.visible)return;
+  f.root.position.y=sleeping&&f.index===active?-.12:Math.sin(t*3)*.035;
+  f.head.rotation.z=Math.sin(t*1.7)*.025;
+  f.tail.rotation.y=Math.sin(t*3)*.25;
+  f.arms.forEach(a=>a.rotation.z=0);
+  f.legs.forEach(l=>l.rotation.x=0);
 
- tail.rotation.y=Math.sin(t*3)*.25;
-
- leftArm.rotation.z=0;
- rightArm.rotation.z=0;
- leftLeg.rotation.x=0;
- rightLeg.rotation.x=0;
-
- if(action==='dance'){
-  leftArm.rotation.z=Math.sin(t*12)*.9;
-  rightArm.rotation.z=-Math.sin(t*12)*.9;
-  leftLeg.rotation.x=Math.sin(t*12)*.5;
-  rightLeg.rotation.x=-Math.sin(t*12)*.5;
-  tom.rotation.y=Math.sin(t*6)*.15;
- }
- if(action==='eat'){
-  rightArm.rotation.z=-1.3;
-  head.rotation.x=.18;
- }
- if(action==='bath'){
-  leftArm.rotation.z=Math.sin(t*10)*.7;
-  rightArm.rotation.z=-Math.sin(t*10)*.7;
- }
- if(action==='talk'){
-  rightArm.rotation.z=-.5;
-  head.rotation.y=Math.sin(t*5)*.12;
- }
- if(action==='happy'){
-  leftArm.rotation.z=.9;
-  rightArm.rotation.z=-.9;
- }
- if(sleeping){
-  head.rotation.x=.15;
- }
-
+  if(f.index===active){
+   if(action==='dance'){
+    f.arms[0].rotation.z=Math.sin(t*12)*.8;
+    f.arms[1].rotation.z=-Math.sin(t*12)*.8;
+    f.legs[0].rotation.x=Math.sin(t*12)*.45;
+    f.legs[1].rotation.x=-Math.sin(t*12)*.45;
+   }
+   if(action==='walk'||action==='run'){
+    const speed=action==='run'?13:8;
+    f.legs[0].rotation.x=Math.sin(t*speed)*.65;
+    f.legs[1].rotation.x=-Math.sin(t*speed)*.65;
+    f.arms[0].rotation.z=-Math.sin(t*speed)*.45;
+    f.arms[1].rotation.z=Math.sin(t*speed)*.45;
+   }
+   if(action==='jump')f.root.position.y=Math.abs(Math.sin(t*9))*.8;
+   if(action==='eat')f.arms[1].rotation.z=-1;
+   if(action==='bath'){
+    f.arms[0].rotation.z=Math.sin(t*10)*.7;
+    f.arms[1].rotation.z=-Math.sin(t*10)*.7;
+   }
+   if(action==='talk')f.arms[1].rotation.z=-.5;
+   if(sleeping)f.head.rotation.x=.16;
+  }
+ });
+ stars.forEach(s=>s.rotation.y+=dt*2);
  renderer.render(scene,camera);
 }
-
 animate();
 updateStats();
 
 setInterval(()=>{
- if(!sleeping){
-  hunger=Math.max(0,hunger-.3);
-  energy=Math.max(0,energy-.15);
- }else{
-  energy=Math.min(100,energy+2);
+ if(sleeping)energy=Math.min(100,energy+3);
+ else{
+  hunger=Math.max(0,hunger-.2);
+  energy=Math.max(0,energy-.08);
  }
  updateStats();
 },3000);
-
-window.addEventListener('resize',()=>{
- camera.aspect=innerWidth/(innerHeight-220);
- camera.updateProjectionMatrix();
- renderer.setSize(innerWidth,innerHeight-220);
-});
 </script>
 </body>
 </html>
+
